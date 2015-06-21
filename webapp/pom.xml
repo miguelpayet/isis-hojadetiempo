@@ -1,22 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Licensed to the Apache Software Foundation (ASF) under one
-  or more contributor license agreements.  See the NOTICE file
-  distributed with this work for additional information
-  regarding copyright ownership.  The ASF licenses this file
-  to you under the Apache License, Version 2.0 (the
-  "License"); you may not use this file except in compliance
-  with the License.  You may obtain a copy of the License at
-  
-         http://www.apache.org/licenses/LICENSE-2.0
-         
-  Unless required by applicable law or agreed to in writing,
-  software distributed under the License is distributed on an
-  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-  KIND, either express or implied.  See the License for the
-  specific language governing permissions and limitations
-  under the License.
---><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -28,14 +12,16 @@
     <artifactId>isis-hojadetiempo-webapp</artifactId>
     <name>Simple App Webapp</name>
 
-    <description>This module runs both the Wicket viewer and the Restfulobjects viewer in a single webapp configured to run using the datanucleus object store.</description>
+    <description>This module runs both the Wicket viewer and the Restfulobjects viewer in a single webapp configured to
+        run using the datanucleus object store.
+    </description>
 
     <packaging>war</packaging>
 
     <properties>
         <siteBaseDir>..</siteBaseDir>
     </properties>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -54,7 +40,8 @@
                         </goals>
                         <configuration>
                             <backgroundImage>${basedir}/src/main/jettyconsole/isis-banner.png</backgroundImage>
-                            <destinationFile>${project.build.directory}/${project.build.finalName}-jetty-console.jar</destinationFile>
+                            <destinationFile>${project.build.directory}/${project.build.finalName}-jetty-console.jar
+                            </destinationFile>
                         </configuration>
                         <phase>package</phase>
                     </execution>
@@ -65,17 +52,17 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>1.8</version>
-                  <executions>
+                <executions>
                     <execution>
-                      <phase>validate</phase>
-                      <goals>
-                        <goal>maven-version</goal>
-                      </goals>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>maven-version</goal>
+                        </goals>
                     </execution>
-                  </executions>
+                </executions>
             </plugin>
 
-            <plugin>
+            <!--plugin>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <warName>simpleapp</warName>
@@ -94,7 +81,7 @@
                         </manifestEntries>
                     </archive>
                 </configuration>
-            </plugin>
+            </plugin-->
 
         </plugins>
         <pluginManagement>
@@ -129,7 +116,7 @@
     </build>
 
     <dependencies>
-    
+
         <!-- other modules in this project -->
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -153,7 +140,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        
+
         <!-- other isis components -->
         <dependency>
             <groupId>org.apache.isis.viewer</groupId>
@@ -198,49 +185,22 @@
             <artifactId>geronimo-servlet_3.0_spec</artifactId>
         </dependency>
 
-        <!-- 
-          JDBC drivers 
-          (for jdo objectstore)
-          -->
+        <!-- base de datos -->
         <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.6</version>
         </dependency>
-
-        <!-- 
         <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>9.1-901.jdbc4</version>
+            <groupId>org.lazyluke</groupId>
+            <artifactId>log4jdbc-remix</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-         -->
-
-        <!-- 
-        mvn install:install-file -Dfile=sqljdbc4.jar \
-                                 -DgroupId=com.microsoft.sqlserver \
-                                 -DartifactId=jdbc \
-                                 -Dversion=4.0 \
-                                 -Dpackaging=jar
-         -->
-         <!-- 
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>sqljdbc4</artifactId>
-            <version>4.0</version>
-        </dependency>
-          -->
-
-        <dependency>
-          <groupId>org.lazyluke</groupId>
-          <artifactId>log4jdbc-remix</artifactId>
-          <exclusions>
-            <exclusion>
-              <groupId>org.slf4j</groupId>
-              <artifactId>slf4j-api</artifactId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-
     </dependencies>
 
     <profiles>
@@ -257,8 +217,8 @@
                         <configuration>
                             <tasks>
                                 <exec executable="java" failonerror="true">
-                                    <arg value="-jar" />
-                                    <arg value="${project.build.directory}/${project.build.finalName}-jetty-console.jar" />
+                                    <arg value="-jar"/>
+                                    <arg value="${project.build.directory}/${project.build.finalName}-jetty-console.jar"/>
                                 </exec>
                             </tasks>
                         </configuration>
@@ -290,7 +250,8 @@
             <properties>
                 <!-- as used in the rebel.xml in the dom project -->
                 <target.dir>target</target.dir>
-                <isis-jrebel-plugin.packagePrefix>dom.simple,org.apache.isis.objectstore.jdo.applib</isis-jrebel-plugin.packagePrefix>
+                <isis-jrebel-plugin.packagePrefix>dom.simple,org.apache.isis.objectstore.jdo.applib
+                </isis-jrebel-plugin.packagePrefix>
                 <isis-jrebel-plugin.loggingLevel>warn</isis-jrebel-plugin.loggingLevel>
             </properties>
             <build>
@@ -300,60 +261,59 @@
                         -Djrebel.jar="C:/Users/Dan/.IdeaIC13/config/plugins/jr-ide-idea/lib/jrebel/jrebel.jar" \
                         -Disis_jrebel_plugin.jar="C:/github/danhaywood/isis-jrebel-plugin/target/danhaywood-isis-jrebel-plugin-1.0.0-SNAPSHOT.jar"
                     -->
-                    <plugin>
+                    <!--plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <configuration>
                             <target>
-                                <property name="compile_classpath" refid="maven.compile.classpath" />
-                                <property name="runtime_classpath" refid="maven.runtime.classpath" />
-                                <property name="test_classpath" refid="maven.test.classpath" />
-                                <property name="plugin_classpath" refid="maven.plugin.classpath" />
+                                <property name="compile_classpath" refid="maven.compile.classpath"/>
+                                <property name="runtime_classpath" refid="maven.runtime.classpath"/>
+                                <property name="test_classpath" refid="maven.test.classpath"/>
+                                <property name="plugin_classpath" refid="maven.plugin.classpath"/>
 
-                                <echo message="" />
-                                <echo message="" />
-                                <echo message="jrebel.jar             = ${jrebel.jar}" />
-                                <echo message="isis_jrebel_plugin.jar = ${isis_jrebel_plugin.jar}" />
-                                <echo message="target.dir             = ${target.dir}" />
-                                <echo message="" />
-                                <echo message="" />
+                                <echo message=""/>
+                                <echo message=""/>
+                                <echo message="jrebel.jar             = ${jrebel.jar}"/>
+                                <echo message="isis_jrebel_plugin.jar = ${isis_jrebel_plugin.jar}"/>
+                                <echo message="target.dir             = ${target.dir}"/>
+                                <echo message=""/>
+                                <echo message=""/>
 
                                 <exec executable="java" failonerror="true">
-                                    <arg value="-javaagent:${jrebel.jar}" />
-                                    <arg value="-Drebel.log=false" />
-                                    <arg value="-Drebel.check_class_hash=true" />
-                                    <arg value="-Drebel.packages_exclude=org.apache.isis" />
+                                    <arg value="-javaagent:${jrebel.jar}"/>
+                                    <arg value="-Drebel.log=false"/>
+                                    <arg value="-Drebel.check_class_hash=true"/>
+                                    <arg value="-Drebel.packages_exclude=org.apache.isis"/>
 
-                                    <!-- as used in the rebel.xml in the dom project -->
-                                    <arg value="-Dproject.root=${project.basedir}/.." />
-                                    <arg value="-Dtarget.dir=${target.dir}" />
+                                    <- as used in the rebel.xml in the dom project ->
+                                    <arg value="-Dproject.root=${project.basedir}/.."/>
+                                    <arg value="-Dtarget.dir=${target.dir}"/>
 
-                                    <arg value="-Drebel.plugins=${isis_jrebel_plugin.jar}" />
-                                    <arg value="-Disis-jrebel-plugin.packagePrefix=${isis-jrebel-plugin.packagePrefix}" />
-                                    <arg value="-Disis-jrebel-plugin.loggingLevel=${isis-jrebel-plugin.loggingLevel}" />
-                                    <arg value="-XX:MaxPermSize=128m" />
-                                    <arg value="-classpath" />
-                                    <arg value="${runtime_classpath}" />
-                                    <arg value="org.apache.isis.WebServer" />
+                                    <arg value="-Drebel.plugins=${isis_jrebel_plugin.jar}"/>
+                                    <arg value="-Disis-jrebel-plugin.packagePrefix=${isis-jrebel-plugin.packagePrefix}"/>
+                                    <arg value="-Disis-jrebel-plugin.loggingLevel=${isis-jrebel-plugin.loggingLevel}"/>
+                                    <arg value="-XX:MaxPermSize=128m"/>
+                                    <arg value="-classpath"/>
+                                    <arg value="${runtime_classpath}"/>
+                                    <arg value="org.apache.isis.WebServer"/>
                                 </exec>
                             </target>
                         </configuration>
-                    </plugin>
+                    </plugin-->
                 </plugins>
             </build>
         </profile>
-        <profile>
-        	<id>neo4j</id>
-        	<dependencies>
-		        <dependency>
-		        	<groupId>org.datanucleus</groupId>
-		        	<artifactId>datanucleus-neo4j</artifactId>
-		        	<version>4.0.4</version>
-		        </dependency>
-        	</dependencies>
-        </profile>
+        <!--profile>
+            <id>neo4j</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.datanucleus</groupId>
+                    <artifactId>datanucleus-neo4j</artifactId>
+                    <version>4.0.4</version>
+                </dependency>
+            </dependencies>
+        </profile-->
     </profiles>
-
 
 
 </project>

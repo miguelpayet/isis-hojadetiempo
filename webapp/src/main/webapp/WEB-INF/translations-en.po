@@ -27,7 +27,7 @@ msgid "Clear translation cache"
 msgstr "Clear translation cache"
 
 
-#: domainapp.dom.modules.simple.SimpleObjects#create()
+#: SimpleObjects#create()
 msgid "Create"
 msgstr "Create"
 
@@ -47,12 +47,12 @@ msgid "Download Translations"
 msgstr "Download Translations"
 
 
-#: domainapp.dom.modules.simple.SimpleObject#updateName()
+#: SimpleObject#updateName()
 msgid "Exclamation mark is not allowed"
 msgstr "Exclamation mark is not allowed"
 
 
-#: domainapp.dom.modules.simple.SimpleObjects#findByName()
+#: SimpleObjects#findByName()
 msgid "Find By Name"
 msgstr "Find By Name"
 
@@ -67,17 +67,17 @@ msgid "Friendly Name"
 msgstr "Friendly Name"
 
 
-#: domainapp.dom.modules.simple.SimpleObject
+#: SimpleObject
 msgid "General"
 msgstr "General"
 
 
-#: domainapp.dom.app.homepage.HomePageService#homePage()
+#: HomePageService#homePage()
 msgid "Home Page"
 msgstr "Home Page"
 
 
-#: domainapp.dom.modules.simple.SimpleObjects#listAll()
+#: SimpleObjects#listAll()
 msgid "List All"
 msgstr "List All"
 
@@ -93,14 +93,14 @@ msgid "Lookup"
 msgstr "Lookup"
 
 
-#: domainapp.dom.modules.simple.SimpleObject#name
-#: domainapp.dom.modules.simple.SimpleObjects#create(java.lang.String)
-#: domainapp.dom.modules.simple.SimpleObjects#findByName(java.lang.String)
+#: SimpleObject#name
+#: SimpleObjects#create(java.lang.String)
+#: SimpleObjects#findByName(java.lang.String)
 msgid "Name"
 msgstr "Name"
 
 
-#: domainapp.dom.modules.simple.SimpleObject#updateName(java.lang.String)
+#: SimpleObject#updateName(java.lang.String)
 msgid "New name"
 msgstr "New name"
 
@@ -110,12 +110,12 @@ msgid "Object"
 msgstr "Object"
 
 
-#: domainapp.dom.modules.simple.SimpleObject#title()
+#: SimpleObject#title()
 msgid "Object: {name}"
 msgstr "Object: {name}"
 
 
-#: domainapp.dom.app.homepage.HomePageViewModel#objects
+#: HomePageViewModel#objects
 msgid "Objects"
 msgstr "Objects"
 
@@ -174,7 +174,7 @@ msgid "Script-specific parameters (if any).  The format depends on the script im
 msgstr "Script-specific parameters (if any).  The format depends on the script implementation (eg key=value, CSV, JSON, XML etc)"
 
 
-#: domainapp.dom.modules.simple.SimpleObjects#title()
+#: SimpleObjects#title()
 msgid "Simple Objects"
 msgstr "Simple Objects"
 
@@ -194,12 +194,12 @@ msgid "Type"
 msgstr "Type"
 
 
-#: domainapp.dom.modules.simple.SimpleObject#updateName()
+#: SimpleObject#updateName()
 msgid "Update Name"
 msgstr "Update Name"
 
 
-#: domainapp.dom.modules.simple.SimpleObject
+#: SimpleObject
 msgid "name"
 msgstr ""
 

@@ -21,8 +21,8 @@ package domainapp.fixture.modules.simple;
 
 import org.apache.isis.applib.fixturescripts.FixtureScript;
 
-import domainapp.dom.modules.simple.SimpleObject;
-import domainapp.dom.modules.simple.SimpleObjects;
+import dom.domainapp.modules.simple.SimpleObject;
+import dom.domainapp.modules.simple.SimpleObjects;
 
 public class SimpleObjectCreate extends FixtureScript {
 

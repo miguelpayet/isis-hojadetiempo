@@ -27,7 +27,7 @@ msgid "Clear translation cache"
 msgstr "Limpiar la caché de traducciones"
 
 
-#: domainapp.dom.modules.simple.SimpleObjects#create()
+#: SimpleObjects#create()
 msgid "Create"
 msgstr "Crear"
 
@@ -47,12 +47,12 @@ msgid "Download Translations"
 msgstr "Descargar traducciones"
 
 
-#: domainapp.dom.modules.simple.SimpleObject#updateName()
+#: SimpleObject#updateName()
 msgid "Exclamation mark is not allowed"
 msgstr "No se admite el signo de exclamación"
 
 
-#: domainapp.dom.modules.simple.SimpleObjects#findByName()
+#: SimpleObjects#findByName()
 msgid "Find By Name"
 msgstr "Buscar por Nombre"
 
@@ -67,12 +67,12 @@ msgid "Friendly Name"
 msgstr "Nombre común"
 
 
-#: domainapp.dom.app.homepage.HomePageService#homePage()
+#: HomePageService#homePage()
 msgid "Home Page"
 msgstr "Página de Inicio"
 
 
-#: domainapp.dom.modules.simple.SimpleObjects#listAll()
+#: SimpleObjects#listAll()
 msgid "List All"
 msgstr "Listar Todos"
 
@@ -88,14 +88,14 @@ msgid "Lookup"
 msgstr "Buscar"
 
 
-#: domainapp.dom.modules.simple.SimpleObject#name
-#: domainapp.dom.modules.simple.SimpleObjects#create(java.lang.String)
-#: domainapp.dom.modules.simple.SimpleObjects#findByName(java.lang.String)
+#: SimpleObject#name
+#: SimpleObjects#create(java.lang.String)
+#: SimpleObjects#findByName(java.lang.String)
 msgid "Name"
 msgstr "Nombre"
 
 
-#: domainapp.dom.modules.simple.SimpleObject#updateName(java.lang.String)
+#: SimpleObject#updateName(java.lang.String)
 msgid "New name"
 msgstr "Nuevo nombre"
 
@@ -105,12 +105,12 @@ msgid "Object"
 msgstr "Objeto"
 
 
-#: domainapp.dom.modules.simple.SimpleObject#title()
+#: SimpleObject#title()
 msgid "Object: {name}"
 msgstr "Objeto: {name}"
 
 
-#: domainapp.dom.app.homepage.HomePageViewModel#objects
+#: HomePageViewModel#objects
 msgid "Objects"
 msgstr "Objetos"
 
@@ -169,7 +169,7 @@ msgid "Script-specific parameters (if any).  The format depends on the script im
 msgstr "Parámetros específicos del Script (si hay alguno). El formato depende de la implementación del script (por ejemplo, clave=valor, CSV, JSON, XML, etc.)"
 
 
-#: domainapp.dom.modules.simple.SimpleObjects#title()
+#: SimpleObjects#title()
 msgid "Simple Objects"
 msgstr "Objetos básicos"
 
@@ -189,12 +189,12 @@ msgid "Type"
 msgstr "Tipo"
 
 
-#: domainapp.dom.modules.simple.SimpleObject#updateName()
+#: SimpleObject#updateName()
 msgid "Update Name"
 msgstr "Nombre de la Actualización"
 
 
-#: domainapp.dom.modules.simple.SimpleObject
+#: SimpleObject
 msgid "name"
 msgstr ""
 

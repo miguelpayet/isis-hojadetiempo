@@ -27,7 +27,7 @@ msgid "Clear translation cache"
 msgstr ""
 
 
-#: domainapp.dom.modules.simple.SimpleObjects#create()
+#: SimpleObjects#create()
 msgid "Create"
 msgstr ""
 
@@ -47,12 +47,12 @@ msgid "Download Translations"
 msgstr ""
 
 
-#: domainapp.dom.modules.simple.SimpleObject#updateName()
+#: SimpleObject#updateName()
 msgid "Exclamation mark is not allowed"
 msgstr ""
 
 
-#: domainapp.dom.modules.simple.SimpleObjects#findByName()
+#: SimpleObjects#findByName()
 msgid "Find By Name"
 msgstr ""
 
@@ -67,17 +67,17 @@ msgid "Friendly Name"
 msgstr ""
 
 
-#: domainapp.dom.modules.simple.SimpleObject
+#: SimpleObject
 msgid "General"
 msgstr "Common"
 
 
-#: domainapp.dom.app.homepage.HomePageService#homePage()
+#: HomePageService#homePage()
 msgid "Home Page"
 msgstr ""
 
 
-#: domainapp.dom.modules.simple.SimpleObjects#listAll()
+#: SimpleObjects#listAll()
 msgid "List All"
 msgstr ""
 
@@ -93,14 +93,14 @@ msgid "Lookup"
 msgstr ""
 
 
-#: domainapp.dom.modules.simple.SimpleObject#name
-#: domainapp.dom.modules.simple.SimpleObjects#create(java.lang.String)
-#: domainapp.dom.modules.simple.SimpleObjects#findByName(java.lang.String)
+#: SimpleObject#name
+#: SimpleObjects#create(java.lang.String)
+#: SimpleObjects#findByName(java.lang.String)
 msgid "Name"
 msgstr ""
 
 
-#: domainapp.dom.modules.simple.SimpleObject#updateName(java.lang.String)
+#: SimpleObject#updateName(java.lang.String)
 msgid "New name"
 msgstr ""
 
@@ -110,12 +110,12 @@ msgid "Object"
 msgstr ""
 
 
-#: domainapp.dom.modules.simple.SimpleObject#title()
+#: SimpleObject#title()
 msgid "Object: {name}"
 msgstr ""
 
 
-#: domainapp.dom.app.homepage.HomePageViewModel#objects
+#: HomePageViewModel#objects
 msgid "Objects"
 msgstr ""
 
@@ -174,7 +174,7 @@ msgid "Script-specific parameters (if any).  The format depends on the script im
 msgstr ""
 
 
-#: domainapp.dom.modules.simple.SimpleObjects#title()
+#: SimpleObjects#title()
 msgid "Simple Objects"
 msgstr ""
 
@@ -194,12 +194,12 @@ msgid "Type"
 msgstr ""
 
 
-#: domainapp.dom.modules.simple.SimpleObject#updateName()
+#: SimpleObject#updateName()
 msgid "Update Name"
 msgstr ""
 
 
-#: domainapp.dom.modules.simple.SimpleObject
+#: SimpleObject
 msgid "name"
 msgstr ""
 
