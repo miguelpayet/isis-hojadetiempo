@@ -16,35 +16,36 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package domainapp.dom.app.homepage;
+package dom.domainapp.app.homepage;
 
-import java.util.List;
+import org.apache.isis.applib.DomainObjectContainer;
+import org.apache.isis.applib.annotation.Action;
+import org.apache.isis.applib.annotation.DomainService;
+import org.apache.isis.applib.annotation.HomePage;
+import org.apache.isis.applib.annotation.NatureOfService;
+import org.apache.isis.applib.annotation.SemanticsOf;
 
-import org.apache.isis.applib.annotation.ViewModel;
+@DomainService(
+        nature = NatureOfService.VIEW_CONTRIBUTIONS_ONLY // trick to suppress the actions from the top-level menu
+)
+public class HomePageService {
 
-import domainapp.dom.modules.simple.SimpleObject;
-import domainapp.dom.modules.simple.SimpleObjects;
+    //region > homePage (action)
 
-@ViewModel
-public class HomePageViewModel {
-
-    //region > title
-    public String title() {
-        return getObjects().size() + " objects";
+    @Action(
+            semantics = SemanticsOf.SAFE
+    )
+    @HomePage
+    public HomePageViewModel homePage() {
+        return container.injectServicesInto(new HomePageViewModel());
     }
-    //endregion
 
-    //region > object (collection)
-    @org.apache.isis.applib.annotation.HomePage
-    public List<SimpleObject> getObjects() {
-        return simpleObjects.listAll();
-    }
     //endregion
 
     //region > injected services
 
     @javax.inject.Inject
-    SimpleObjects simpleObjects;
+    DomainObjectContainer container;
 
     //endregion
 }

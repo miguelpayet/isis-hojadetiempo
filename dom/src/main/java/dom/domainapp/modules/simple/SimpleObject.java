@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package domainapp.dom.modules.simple;
+package dom.domainapp.modules.simple;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.annotations.IdentityType;
@@ -52,11 +52,11 @@ import org.apache.isis.applib.util.ObjectContracts;
         @javax.jdo.annotations.Query(
                 name = "find", language = "JDOQL",
                 value = "SELECT "
-                        + "FROM domainapp.dom.modules.simple.SimpleObject "),
+                        + "FROM SimpleObject "),
         @javax.jdo.annotations.Query(
                 name = "findByName", language = "JDOQL",
                 value = "SELECT "
-                        + "FROM domainapp.dom.modules.simple.SimpleObject "
+                        + "FROM SimpleObject "
                         + "WHERE name.indexOf(:name) >= 0 ")
 })
 @javax.jdo.annotations.Unique(name="SimpleObject_name_UNQ", members = {"name"})
