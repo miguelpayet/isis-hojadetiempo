@@ -1,28 +1,31 @@
 package dom.modules.reportes;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 public class PropertiesFile {
 
     String fileName;
     java.util.Properties props;
-    //@Inject
-    //dom.ServletContextProvider servletContextProvider;
+    String baseFilename;
 
     public PropertiesFile(String fileName) throws IOException {
-        this.fileName = "/WEB-INF/" + fileName;
+        this.baseFilename = fileName;
+        this.fileName = new File(".").getAbsolutePath() + "/src/main/webapp/WEB-INF/" + fileName;
         loadProperties();
     }
 
     public void loadProperties() throws IOException {
-        //InputStream inputStream = servletContextProvider.getServletContext().getResourceAsStream(fileName);
-        //if (inputStream != null) {
-       //     props.load(inputStream);
-       // } else {
-       //     throw new java.io.FileNotFoundException("property file '" + fileName + "' not found in the classpath");
-       // }
+        //FileInputStream inputStream = new FileInputStream(fileName);
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(baseFilename);
+        if (inputStream != null) {
+            props = new java.util.Properties();
+            props.load(inputStream);
+        } else {
+            throw new FileNotFoundException("property file '" + fileName + "' not found in the classpath");
+        }
     }
 
     public String getProperty(String propertyName) {

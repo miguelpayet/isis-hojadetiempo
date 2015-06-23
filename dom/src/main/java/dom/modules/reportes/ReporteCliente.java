@@ -5,11 +5,18 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+import static net.sf.dynamicreports.report.builder.DynamicReports.*;
+import net.sf.dynamicreports.report.exception.DRException;
 
 public class ReporteCliente {
     private final static Logger LOG = LoggerFactory.getLogger(ReporteCliente.class);
 
     String sql;
+    Connection conn;
 
     public ReporteCliente(int idCliente, Date desde, Date hasta) {
         initSql(idCliente, desde, hasta);
@@ -27,20 +34,27 @@ public class ReporteCliente {
         LOG.info(sql);
     }
 
-    private void buildDataSource() throws IOException {
+    private void buildDataSource() throws IOException, SQLException {
         PropertiesFile pr = new PropertiesFile("persistor.properties");
         String url = pr.getProperty("isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionURL");
-        LOG.info(url);
+        String user = pr.getProperty("isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionUserName");
+        String password = pr.getProperty("isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionUserName");
+        conn = DriverManager.getConnection(url, user, password);
     }
 
-    public void build() throws IOException {
+    public void build() throws IOException, SQLException {
+        LOG.info(new java.io.File(".").getAbsolutePath());
         buildDataSource();
-        /*
-        report()
-                .columns(col.column("Item", "item", type.stringType()),
-                        col.column("Quantity", "quantity", type.integerType()),
-                        col.column("Unit price", "unitprice", type.bigDecimalType()))
-                .setDataSource();
-*/
+        try {
+            report()
+                    .columns(
+                            col.column("Cliente", "nombre", type.stringType()),
+                            col.column("Abogado", "username", type.stringType()),
+                            col.column("Fecha", "fecha", type.dateType()))
+                    .setDataSource(sql, conn)
+                    .show();
+        } catch (DRException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -14,6 +14,8 @@ import javax.inject.Inject;
 import java.sql.Date;
 import java.util.List;
 import java.util.SortedSet;
+import java.io.IOException;
+import java.sql.SQLException;
 
 @DomainService()
 @DomainServiceLayout(named = "Procesos", menuBar = DomainServiceLayout.MenuBar.PRIMARY, menuOrder = "2")
@@ -25,8 +27,6 @@ public class ReportesService extends AbstractFactoryAndRepository {
     ApplicationRoles applicationRoles;
     @Inject
     ClienteService clienteService;
-   //@Inject
-   //webapp.ServletContextService servletContextService;
 
     @Programmatic
     public List<Cliente> autoComplete0ReportePorCliente(final String name) {
@@ -78,13 +78,15 @@ public class ReportesService extends AbstractFactoryAndRepository {
             @Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Cliente") final Cliente cliente,
             @Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Desde") final Date desde,
             @Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Hasta") final Date hasta) {
-       // try {
+        try {
             java.sql.Date desdeAjustado = ajustadorFecha.ajustarFechaInicial(desde);
             java.sql.Date hastaAjustado = ajustadorFecha.ajustarFechaFinal(hasta);
-            //dom.modules.reportes.ReporteCliente rep = new dom.modules.reportes.ReporteCliente(servletContextService.getServletContext(), cliente.getId(), desde, hasta);
-            //rep.build();
-        //} catch (java.io.IOException e) {
-        //    e.printStackTrace();
-        //}
+            ReporteCliente rep = new ReporteCliente(cliente.getId(), desde, hasta);
+            rep.build();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
