@@ -15,7 +15,6 @@ import org.isisaddons.module.security.dom.role.ApplicationRoles;
 import org.isisaddons.module.security.dom.user.ApplicationUser;
 
 import javax.inject.Inject;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
@@ -26,6 +25,7 @@ public class HojaDeTiempoService extends AbstractFactoryAndRepository {
 
     public static String ROL_ABOGADO = "isis-module-security-regular-user";
     public static String ROL_ADMIN = "isis-module-security-admin";
+    private final AjustadorFecha ajustadorFecha = new AjustadorFecha();
 
     @Inject
     ApplicationRoles applicationRoles;
@@ -36,30 +36,7 @@ public class HojaDeTiempoService extends AbstractFactoryAndRepository {
     @Inject
     private MeService userService;
 
-    @SuppressWarnings("deprecation")
-    @Programmatic
-    private java.sql.Date ajustarFecha(java.sql.Date fecha, int offset) {
-        Calendar cal = Calendar.getInstance();
-        cal.set(1900 + fecha.getYear(), fecha.getMonth(), fecha.getDate(), 00, 00, 00);
-        cal.add(Calendar.DATE, offset);
-        return new java.sql.Date(cal.getTime().getTime());
-    }
-
-    @Programmatic
-    private java.sql.Date ajustarFechaFinal(java.sql.Date hasta) {
-        return ajustarFecha(hasta, 1);
-    }
-
-    @Programmatic
-    private java.sql.Date ajustarFechaInicial(java.sql.Date desde) {
-        return ajustarFecha(desde, 0);
-    }
-
     public List<Cliente> autoComplete0RegistrarSinAbogado(final String name) {
-        return autoCompleteCliente(name);
-    }
-
-    public List<Cliente> autoComplete1Registrar(final String name) {
         return autoCompleteCliente(name);
     }
 
@@ -69,32 +46,22 @@ public class HojaDeTiempoService extends AbstractFactoryAndRepository {
 
     }
 
-    @Programmatic
-    private List<HojaDeTiempo> buscarPendientes() {
-        return container.allMatches(new QueryDefault<HojaDeTiempo>(
-                HojaDeTiempo.class, "findPendientes"));
-    }
-
-    @Programmatic
-    private List<HojaDeTiempo> buscarPendientesPorAbogado(
-            ApplicationUser abogado) {
-        return container.allMatches(new QueryDefault<HojaDeTiempo>(
-                HojaDeTiempo.class, "findPendientesByAbogado", "abogado",
-                abogado));
-    }
-
-    @Programmatic
-    private List<HojaDeTiempo> buscarPorAbogadoyFecha(java.sql.Date desde,
-                                                      java.sql.Date hasta, ApplicationUser abogado) {
-        Date desdeAjustado = ajustarFechaInicial(desde);
-        Date hastaAjustado = ajustarFechaFinal(hasta);
-        return container.allMatches(new QueryDefault<HojaDeTiempo>(
-                HojaDeTiempo.class, "findByAbogadoyFecha", "abogado", abogado,
-                "desde", desdeAjustado, "hasta", hastaAjustado));
+    public List<Cliente> autoComplete1Registrar(final String name) {
+        return autoCompleteCliente(name);
     }
 
     public SortedSet<ApplicationUser> choices0Consultar() {
         return consultarAbogados();
+    }
+
+    @Programmatic
+    public SortedSet<ApplicationUser> consultarAbogados() {
+        SortedSet<ApplicationUser> abogados = null;
+        ApplicationRole rol = applicationRoles.findRoleByName(ROL_ABOGADO);
+        if (rol != null) {
+            abogados = rol.getUsers();
+        }
+        return abogados;
     }
 
     public SortedSet<ApplicationUser> choices0Registrar() {
@@ -111,13 +78,13 @@ public class HojaDeTiempoService extends AbstractFactoryAndRepository {
     }
 
     @Programmatic
-    public SortedSet<ApplicationUser> consultarAbogados() {
-        SortedSet<ApplicationUser> abogados = null;
-        ApplicationRole rol = applicationRoles.findRoleByName(ROL_ABOGADO);
-        if (rol != null) {
-            abogados = rol.getUsers();
-        }
-        return abogados;
+    private List<HojaDeTiempo> buscarPorAbogadoyFecha(java.sql.Date desde,
+                                                      java.sql.Date hasta, ApplicationUser abogado) {
+        Date desdeAjustado = ajustadorFecha.ajustarFechaInicial(desde);
+        Date hastaAjustado = ajustadorFecha.ajustarFechaFinal(hasta);
+        return container.allMatches(new QueryDefault<HojaDeTiempo>(
+                HojaDeTiempo.class, "findByAbogadoyFecha", "abogado", abogado,
+                "desde", desdeAjustado, "hasta", hastaAjustado));
     }
 
     @ActionLayout(bookmarking = BookmarkPolicy.NEVER, named = "Revisar hojas de tiempo pendientes")
@@ -126,11 +93,25 @@ public class HojaDeTiempoService extends AbstractFactoryAndRepository {
         return buscarPendientes();
     }
 
+    @Programmatic
+    private List<HojaDeTiempo> buscarPendientes() {
+        return container.allMatches(new QueryDefault<HojaDeTiempo>(
+                HojaDeTiempo.class, "findPendientes"));
+    }
+
     @ActionLayout(bookmarking = BookmarkPolicy.NEVER, named = "Revisar hojas de tiempo pendientes")
     @MemberOrder(sequence = "3")
     public List<HojaDeTiempo> consultarPendientesSinAbogado() {
         ApplicationUser abogado = userService.me();
         return buscarPendientesPorAbogado(abogado);
+    }
+
+    @Programmatic
+    private List<HojaDeTiempo> buscarPendientesPorAbogado(
+            ApplicationUser abogado) {
+        return container.allMatches(new QueryDefault<HojaDeTiempo>(
+                HojaDeTiempo.class, "findPendientesByAbogado", "abogado",
+                abogado));
     }
 
     @ActionLayout(bookmarking = BookmarkPolicy.NEVER, named = "Consultar por fecha")
@@ -144,6 +125,16 @@ public class HojaDeTiempoService extends AbstractFactoryAndRepository {
 
     public boolean hideConsultar() {
         return !usuarioEs(ROL_ADMIN);
+    }
+
+    @Programmatic
+    public boolean usuarioEs(String nombreRol) {
+        Boolean esAbogado = false;
+        UserMemento user = container.getUser();
+        for (RoleMemento rol : user.getRoles()) {
+            esAbogado = esAbogado || (rol.getName().indexOf(nombreRol) > -1);
+        }
+        return esAbogado;
     }
 
     public boolean hideConsultarPendientes() {
@@ -164,6 +155,22 @@ public class HojaDeTiempoService extends AbstractFactoryAndRepository {
 
     public boolean hideRegistrarSinAbogado() {
         return !usuarioEs(ROL_ABOGADO);
+    }
+
+    public List<Integer> choices7Registrar() {
+        return getListaHorasReales();
+    }
+
+    public List<Integer> choices8Registrar() {
+        return getListaMinutosReales();
+    }
+
+    public List<Integer> choices9Registrar() {
+        return getListaHorasFacturables();
+    }
+
+    public List<Integer> choices10Registrar() {
+        return getListaMinutosFacturables();
     }
 
     @ActionLayout(bookmarking = BookmarkPolicy.NEVER, named = "Registrar")
@@ -198,19 +205,40 @@ public class HojaDeTiempoService extends AbstractFactoryAndRepository {
     }
 
     public List<Integer> choices6RegistrarSinAbogado() {
+        return getListaHorasReales();
+    }
+
+    @Programmatic
+    private List<Integer> getListaHorasReales() {
         return Horas.getListaHorasReales();
     }
 
-    public List<Integer> choices7RegistrarSinAbogado() {
+    @Programmatic
+    private List<Integer> getListaMinutosReales() {
         return Minutos.getListaMinutosReales();
     }
 
-    public List<Integer> choices8RegistrarSinAbogado() {
+    @Programmatic
+    private List<Integer> getListaHorasFacturables() {
         return Horas.getListaHorasFacturables();
     }
 
-    public List<Integer> choices9RegistrarSinAbogado() {
+    @Programmatic
+    private List<Integer> getListaMinutosFacturables() {
         return Minutos.getListaMinutosFacturables();
+    }
+
+    public List<Integer> choices7RegistrarSinAbogado() {
+        return getListaMinutosReales();
+    }
+
+    public List<Integer> choices8RegistrarSinAbogado() {
+        return getListaHorasFacturables();
+    }
+
+
+    public List<Integer> choices9RegistrarSinAbogado() {
+        return getListaMinutosFacturables();
     }
 
     @ActionLayout(bookmarking = BookmarkPolicy.NEVER, named = "Registrar hoja de tiempo")
@@ -242,16 +270,6 @@ public class HojaDeTiempoService extends AbstractFactoryAndRepository {
         obj.setMinutosFacturables(minutosFacturables);
         container.persistIfNotAlready(obj);
         return obj;
-    }
-
-    @Programmatic
-    public boolean usuarioEs(String nombreRol) {
-        Boolean esAbogado = false;
-        UserMemento user = container.getUser();
-        for (RoleMemento rol : user.getRoles()) {
-            esAbogado = esAbogado || (rol.getName().indexOf(nombreRol) > -1);
-        }
-        return esAbogado;
     }
 
 }

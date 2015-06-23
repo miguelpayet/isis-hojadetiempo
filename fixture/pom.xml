@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>isis-hojadetiempo-fixture</artifactId>
-    <name>Simple App Fixtures</name>
+    <name>Hoja de Tiempo Fixtures</name>
 
     <dependencies>
         <dependency>

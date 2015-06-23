@@ -7,7 +7,7 @@ import javax.jdo.annotations.*;
 import java.util.List;
 
 @DomainObject(objectType = "Cliente")
-@DatastoreIdentity(strategy = javax.jdo.annotations.IdGeneratorStrategy.IDENTITY, column = "id")
+//@DatastoreIdentity(strategy = javax.jdo.annotations.IdGeneratorStrategy.IDENTITY, column = "id")
 @MemberGroupLayout(columnSpans = {4, 4, 0, 0}, left = {"Cliente"}, middle = {"Dirección"})
 @PersistenceCapable(identityType = IdentityType.DATASTORE, table = "Cliente")
 @Queries({
@@ -23,12 +23,23 @@ import java.util.List;
 @Version(strategy = VersionStrategy.VERSION_NUMBER, column = "version")
 public class Cliente extends AbstractDomainObject {
 
+    private int id;
     private String direccion;
     private String nombre;
     private String numDocumento;
     private String telefono;
     private String tipoDocumento;
     private String tipoPersona;
+
+    @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+    @PrimaryKey
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public List<String> choicesTipoDocumento() {
         return TipoDocumento.getTipos();
@@ -38,66 +49,66 @@ public class Cliente extends AbstractDomainObject {
         return TipoPersona.getTipos();
     }
 
-    @Column(allowsNull = "false", length = 100)
+    @Column(allowsNull = "true", length = 100)
     @MemberOrder(name = "Dirección", sequence = "2")
     @PropertyLayout(multiLine = 5, named = "Dirección", typicalLength = 100, labelPosition = LabelPosition.TOP)
     public String getDireccion() {
         return direccion;
     }
 
-    @Column(allowsNull = "false", length = 40)
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
+    @Column(allowsNull = "true", length = 40)
     @MemberOrder(name = "Cliente", sequence = "1")
     @Title
     public String getNombre() {
         return nombre;
     }
 
-    @Column(allowsNull = "false")
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    @Column(allowsNull = "true")
     @MemberOrder(name = "Cliente", sequence = "4")
     @Property(hidden = Where.ALL_TABLES)
     public String getNumDocumento() {
         return numDocumento;
     }
 
-    @Column(allowsNull = "false")
+    public void setNumDocumento(String numDocumento) {
+        this.numDocumento = numDocumento;
+    }
+
+    @Column(allowsNull = "true")
     @MemberOrder(name = "Dirección", sequence = "1")
     @PropertyLayout(multiLine = 3, named = "Teléfonos", typicalLength = 50, labelPosition = LabelPosition.TOP)
     public String getTelefono() {
         return telefono;
     }
 
-    @Column(allowsNull = "false")
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    @Column(allowsNull = "true")
     @MemberOrder(name = "Cliente", sequence = "3")
     @Property(hidden = Where.ALL_TABLES)
     public String getTipoDocumento() {
         return tipoDocumento;
     }
 
-    @Column(allowsNull = "false")
+    public void setTipoDocumento(String tipoDocumento) {
+        this.tipoDocumento = tipoDocumento;
+    }
+
+    @Column(allowsNull = "true")
     @MemberOrder(name = "Cliente", sequence = "2")
     @Property(hidden = Where.ALL_TABLES)
     public String getTipoPersona() {
         return tipoPersona;
-    }
-
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public void setNumDocumento(String numDocumento) {
-        this.numDocumento = numDocumento;
-    }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-
-    public void setTipoDocumento(String tipoDocumento) {
-        this.tipoDocumento = tipoDocumento;
     }
 
     public void setTipoPersona(String tipoPersona) {

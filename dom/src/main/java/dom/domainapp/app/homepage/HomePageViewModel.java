@@ -18,12 +18,11 @@
  */
 package dom.domainapp.app.homepage;
 
-import java.util.List;
-
 import dom.domainapp.modules.simple.SimpleObject;
+import dom.domainapp.modules.simple.SimpleObjects;
 import org.apache.isis.applib.annotation.ViewModel;
 
-import dom.domainapp.modules.simple.SimpleObjects;
+import java.util.List;
 
 @ViewModel
 public class HomePageViewModel {

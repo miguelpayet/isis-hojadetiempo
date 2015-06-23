@@ -18,7 +18,10 @@ import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.Query;
 import javax.jdo.annotations.VersionStrategy;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.SortedSet;
 
 @javax.jdo.annotations.PersistenceCapable(identityType = IdentityType.DATASTORE)
 @javax.jdo.annotations.DatastoreIdentity(strategy = javax.jdo.annotations.IdGeneratorStrategy.IDENTITY, column = "id")
@@ -30,7 +33,7 @@ import java.util.*;
         @Query(name = "findPendientes", language = "JDOQL", value = "SELECT FROM dom.modules.hoja.HojaDeTiempo WHERE cartaDA == null || caso == null || formaServicio == null || solicitadoPor == null")})
 @DomainObject(objectType = "HojaDeTiempo")
 @DomainObjectLayout(named = "Hoja de tiempo", plural = "Hojas de tiempo")
-@MemberGroupLayout(columnSpans = {6, 0, 6, 0}, left = {"Izquierda"}, right = {"Derecha"})
+@MemberGroupLayout(columnSpans = {6, 0, 6, 0}, left = {"Detalles"}, right = {"Caso", "Facturación"})
 public class HojaDeTiempo extends AbstractDomainObject implements
         Comparable<HojaDeTiempo> {
 
@@ -63,7 +66,7 @@ public class HojaDeTiempo extends AbstractDomainObject implements
 
     public SortedSet<ApplicationUser> choicesAbogado() {
         SortedSet<ApplicationUser> abogados = null;
-        ApplicationRole rol = applicationRoles.findRoleByName("rol-abogado");
+        ApplicationRole rol = applicationRoles.findRoleByName(HojaDeTiempoService.ROL_ABOGADO);
         if (rol != null) {
             abogados = rol.getUsers();
         }
@@ -97,18 +100,8 @@ public class HojaDeTiempo extends AbstractDomainObject implements
         return 0;
     }
 
-    @Column(allowsNull = "false")
-    @MemberOrder(name = "Derecha", sequence = "1")
-    public ApplicationUser getAbogado() {
-        return abogado;
-    }
-
-    public void setAbogado(ApplicationUser abogado) {
-        this.abogado = abogado;
-    }
-
     @Column(allowsNull = "true")
-    @MemberOrder(name = "Izquierda", sequence = "5")
+    @MemberOrder(name = "Detalles", sequence = "5")
     @PropertyLayout(hidden = Where.STANDALONE_TABLES)
     public String getCartaDA() {
         return cartaDA;
@@ -119,8 +112,8 @@ public class HojaDeTiempo extends AbstractDomainObject implements
     }
 
     @Column(allowsNull = "false")
-    @MemberOrder(name = "Derecha", sequence = "2")
-    @PropertyLayout(hidden = Where.STANDALONE_TABLES)
+    @MemberOrder(name = "Caso", sequence = "2")
+    @PropertyLayout(named = "Referencia")
     public String getCaso() {
         return caso;
     }
@@ -130,27 +123,7 @@ public class HojaDeTiempo extends AbstractDomainObject implements
     }
 
     @Column(allowsNull = "false")
-    @MemberOrder(name = "Izquierda", sequence = "2")
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
-
-    @Column(allowsNull = "false")
-    @MemberOrder(name = "Izquierda", sequence = "1")
-    public java.sql.Date getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(java.sql.Date fecha) {
-        this.fecha = fecha;
-    }
-
-    @Column(allowsNull = "false")
-    @MemberOrder(name = "Izquierda", sequence = "4")
+    @MemberOrder(name = "Detalles", sequence = "4")
     @PropertyLayout(named = "Servicio prestado por")
     public FormaServicio getFormaServicio() {
         return formaServicio;
@@ -161,7 +134,7 @@ public class HojaDeTiempo extends AbstractDomainObject implements
     }
 
     @Column(allowsNull = "true")
-    @MemberOrder(name = "Izquierda", sequence = "6")
+    @MemberOrder(name = "Detalles", sequence = "6")
     @PropertyLayout(named = "Servicio prestado (Otros)", hidden = Where.STANDALONE_TABLES)
     public String getFormaServicioOtros() {
         return formaServicioOtros;
@@ -172,7 +145,7 @@ public class HojaDeTiempo extends AbstractDomainObject implements
     }
 
     @Column(allowsNull = "false")
-    @MemberOrder(name = "Izquierda", sequence = "13")
+    @MemberOrder(name = "Detalles", sequence = "14")
     @PropertyLayout(named = "Horas Facturables")
     public Integer getHorasFacturables() {
         return horasFacturables;
@@ -183,7 +156,7 @@ public class HojaDeTiempo extends AbstractDomainObject implements
     }
 
     @Column(allowsNull = "false")
-    @MemberOrder(name = "Izquierda", sequence = "14")
+    @MemberOrder(name = "Detalles", sequence = "15")
     @PropertyLayout(named = "Minutos Facturables")
     public int getMinutosFacturables() {
         return minutosFacturables;
@@ -194,8 +167,8 @@ public class HojaDeTiempo extends AbstractDomainObject implements
     }
 
     @Column(allowsNull = "true")
-    @MemberOrder(name = "Izquierda", sequence = "7")
-    @PropertyLayout(named = "Monto Tarifa")
+    @MemberOrder(name = "Detalles", sequence = "7")
+    @PropertyLayout(named = "Monto Tarifa", hidden = Where.STANDALONE_TABLES)
     public double getMontoTarifa() {
         return montoTarifa;
     }
@@ -205,8 +178,8 @@ public class HojaDeTiempo extends AbstractDomainObject implements
     }
 
     @Column(allowsNull = "true")
-    @MemberOrder(name = "Izquierda", sequence = "8")
-    @PropertyLayout(named = "Presupuesto No.")
+    @MemberOrder(name = "Detalles", sequence = "8")
+    @PropertyLayout(named = "Presupuesto No.", hidden = Where.STANDALONE_TABLES)
     public String getNroPresupuesto() {
         return nroPresupuesto;
     }
@@ -216,7 +189,7 @@ public class HojaDeTiempo extends AbstractDomainObject implements
     }
 
     @Column(allowsNull = "true")
-    @MemberOrder(name = "Izquierda", sequence = "9")
+    @MemberOrder(name = "Detalles", sequence = "9")
     @PropertyLayout(named = "Observaciones", hidden = Where.STANDALONE_TABLES)
     public String getObservaciones() {
         return observaciones;
@@ -227,7 +200,7 @@ public class HojaDeTiempo extends AbstractDomainObject implements
     }
 
     @Column(allowsNull = "false")
-    @MemberOrder(name = "Derecha", sequence = "3")
+    @MemberOrder(name = "Caso", sequence = "3")
     @PropertyLayout(multiLine = 10, named = "Servicio prestado", typicalLength = 250, labelPosition = LabelPosition.TOP, hidden = Where.STANDALONE_TABLES)
     public String getServicio() {
         return servicio;
@@ -238,7 +211,7 @@ public class HojaDeTiempo extends AbstractDomainObject implements
     }
 
     @Column(allowsNull = "false")
-    @MemberOrder(name = "Izquierda", sequence = "2")
+    @MemberOrder(name = "Detalles", sequence = "2")
     @PropertyLayout(hidden = Where.STANDALONE_TABLES)
     public String getSolicitadoPor() {
         return solicitadoPor;
@@ -250,7 +223,7 @@ public class HojaDeTiempo extends AbstractDomainObject implements
 
     @Column(allowsNull = "true")
     @PropertyLayout(hidden = Where.STANDALONE_TABLES)
-    @MemberOrder(name = "Izquierda", sequence = "7")
+    @MemberOrder(name = "Detalles", sequence = "7")
     public Tarifa getTarifa() {
         return tarifa;
     }
@@ -260,8 +233,8 @@ public class HojaDeTiempo extends AbstractDomainObject implements
     }
 
     @Column(allowsNull = "false")
-    @MemberOrder(name = "Izquierda", sequence = "12")
-    @PropertyLayout(named = "Horas", hidden = Where.STANDALONE_TABLES)
+    @MemberOrder(name = "Detalles", sequence = "12")
+    @PropertyLayout(named = "Horas Reales", hidden = Where.STANDALONE_TABLES)
     public Integer getHorasReales() {
         return horasReales;
     }
@@ -271,8 +244,8 @@ public class HojaDeTiempo extends AbstractDomainObject implements
     }
 
     @Column(allowsNull = "false")
-    @MemberOrder(name = "Izquierda", sequence = "13")
-    @PropertyLayout(named = "Minutos", hidden = Where.STANDALONE_TABLES)
+    @MemberOrder(name = "Detalles", sequence = "13")
+    @PropertyLayout(named = "Minutos Reales", hidden = Where.STANDALONE_TABLES)
     public Integer getMinutosReales() {
         return minutosReales;
     }
@@ -282,8 +255,8 @@ public class HojaDeTiempo extends AbstractDomainObject implements
     }
 
     @Column(allowsNull = "true")
-    @MemberOrder(name = "Izquierda", sequence = "10")
-    @PropertyLayout(named = "Cobranza")
+    @MemberOrder(name = "Detalles", sequence = "10")
+    @PropertyLayout(named = "Cobranza", hidden = Where.STANDALONE_TABLES)
     public TipoCobranza getTipoCobranza() {
         return tipoCobranza;
     }
@@ -301,6 +274,36 @@ public class HojaDeTiempo extends AbstractDomainObject implements
         buf.append(" - ");
         buf.append(sdf.format(getFecha()));
         return buf.toString();
+    }
+
+    @Column(allowsNull = "false")
+    @MemberOrder(name = "Caso", sequence = "1")
+    public ApplicationUser getAbogado() {
+        return abogado;
+    }
+
+    public void setAbogado(ApplicationUser abogado) {
+        this.abogado = abogado;
+    }
+
+    @Column(allowsNull = "false")
+    @MemberOrder(name = "Detalles", sequence = "2")
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    @Column(allowsNull = "false")
+    @MemberOrder(name = "Detalles", sequence = "1")
+    public java.sql.Date getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(java.sql.Date fecha) {
+        this.fecha = fecha;
     }
 
     public String validateFormaServicio(FormaServicio forma) {

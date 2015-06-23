@@ -1,9 +1,7 @@
 package dom.modules.prueba;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-
+import com.google.common.eventbus.Subscribe;
+import dom.modules.tablas.FormaServicio;
 import org.apache.isis.applib.DomainObjectContainer;
 import org.apache.isis.applib.annotation.DomainService;
 import org.apache.isis.applib.annotation.Programmatic;
@@ -13,9 +11,9 @@ import org.axonframework.eventhandling.annotation.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.eventbus.Subscribe;
-
-import dom.modules.tablas.FormaServicio;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 @SuppressWarnings("deprecation")
 @DomainService
