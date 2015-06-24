@@ -16,10 +16,15 @@ import java.util.List;
 import java.util.SortedSet;
 import java.io.IOException;
 import java.sql.SQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import net.sf.dynamicreports.report.exception.DRException;
+import org.apache.isis.applib.value.Blob;
 
 @DomainService()
 @DomainServiceLayout(named = "Procesos", menuBar = DomainServiceLayout.MenuBar.PRIMARY, menuOrder = "2")
 public class ReportesService extends AbstractFactoryAndRepository {
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReportesService.class);
 
     private final AjustadorFecha ajustadorFecha = new AjustadorFecha();
 
@@ -74,19 +79,24 @@ public class ReportesService extends AbstractFactoryAndRepository {
 
     @ActionLayout(bookmarking = BookmarkPolicy.NEVER, named = "Reporte por cliente")
     @MemberOrder(sequence = "1")
-    public void reportePorCliente(
+    public Blob reportePorCliente(
             @Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Cliente") final Cliente cliente,
             @Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Desde") final Date desde,
             @Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Hasta") final Date hasta) {
+        ReporteCliente rep = null;
         try {
-            java.sql.Date desdeAjustado = ajustadorFecha.ajustarFechaInicial(desde);
-            java.sql.Date hastaAjustado = ajustadorFecha.ajustarFechaFinal(hasta);
-            ReporteCliente rep = new ReporteCliente(cliente.getId(), desde, hasta);
+            //java.text.SimpleDateFormat sdfDate = new java.text.SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");//dd/MM/yyyy
+            //java.util.Date now = new java.util.Date();
+            //String strDate = sdfDate.format(now);
+            rep = new ReporteCliente(cliente.getId(), ajustadorFecha.ajustarFechaInicial(desde), ajustadorFecha.ajustarFechaFinal(hasta));
             rep.build();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            //byte[] ba = rep.buildBlob();
+            //LOG.info("ba: " + ba.length);
+            //return new Blob("reporte " + strDate + ".pdf", "application/pdf", ba);
+            return rep.buildBlob();
+        } catch (SQLException | IOException | DRException e) {
             e.printStackTrace();
         }
+        return null;
     }
 }
