@@ -22,7 +22,7 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SimpleObjectTest {
-
+/*
     SimpleObject simpleObject;
 
     @Before
@@ -45,5 +45,5 @@ public class SimpleObjectTest {
             assertThat(simpleObject.getName()).isEqualTo(name);
         }
     }
-
+*/
 }

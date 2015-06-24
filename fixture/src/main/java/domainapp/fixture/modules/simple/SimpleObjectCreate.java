@@ -28,9 +28,7 @@ public class SimpleObjectCreate extends FixtureScript {
 
     //region > name (input)
     private String name;
-    /**
-     * Name of the object (required)
-     */
+
     public String getName() {
         return name;
     }
@@ -45,10 +43,6 @@ public class SimpleObjectCreate extends FixtureScript {
     //region > simpleObject (output)
     private SimpleObject simpleObject;
 
-    /**
-     * The created simple object (output).
-     * @return
-     */
     public SimpleObject getSimpleObject() {
         return simpleObject;
     }
@@ -61,7 +55,6 @@ public class SimpleObjectCreate extends FixtureScript {
 
         this.simpleObject = wrap(simpleObjects).create(name);
 
-        // also make available to UI
         ec.addResult(this, simpleObject);
     }
 
