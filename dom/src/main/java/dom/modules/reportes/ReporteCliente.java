@@ -1,27 +1,29 @@
 package dom.modules.reportes;
 
+import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.JasperPdfExporterBuilder;
+import net.sf.dynamicreports.report.base.expression.AbstractSimpleExpression;
+import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
+import net.sf.dynamicreports.report.builder.group.ColumnGroupBuilder;
+import net.sf.dynamicreports.report.builder.style.StyleBuilder;
+import net.sf.dynamicreports.report.constant.GroupHeaderLayout;
+import net.sf.dynamicreports.report.constant.HorizontalAlignment;
+import net.sf.dynamicreports.report.constant.SplitType;
+import net.sf.dynamicreports.report.definition.ReportParameters;
 import net.sf.dynamicreports.report.exception.DRException;
+import org.apache.isis.applib.value.Blob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
-import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
-import com.google.common.io.ByteStreams;
-import org.apache.isis.applib.value.Blob;
-
 import java.text.SimpleDateFormat;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.ByteArrayOutputStream;
-
-import net.sf.dynamicreports.report.exception.DRException;
 
 import static net.sf.dynamicreports.report.builder.DynamicReports.*;
 
@@ -33,14 +35,17 @@ public class ReporteCliente {
     Connection conn;
     String finalFilename;
     JasperReportBuilder rep;
+    String nombreReporte;
 
     public ReporteCliente(int idCliente, Date desde, Date hasta) {
+        nombreReporte = "ReporteCliente-" + Integer.toString(idCliente) + "-" + getFechaString("yyyyMMdd-HHmmss") + ".pdf";
         buildSql(idCliente, desde, hasta);
     }
 
     private void buildSql(int idCliente, Date desde, Date hasta) {
-        String sqlTmp = "select h.cliente_id_oid, c.nombre, h.abogado_id_oid, a.username, h.fecha, h.formaservicio_id_oid, f.nombre, " +
-                "h.solicitadopor,h.caso,h.servicio,h.horasfacturables,h.minutosfacturables " +
+        String sqlTmp = "select h.fecha, h.cliente_id_oid, c.nombre, h.abogado_id_oid, a.username, h.fecha, h.formaservicio_id_oid,  " +
+                "f.nombre tipo_servicio, h.solicitadopor,h.caso,h.servicio,h.horasfacturables,h.minutosfacturables, " +
+                "concat(h.horasreales, ' Hora(s), ', h.minutosreales, ' Minuto(s)') tiemporeal " +
                 "from hojadetiempo h " +
                 "join cliente c on c.id = h.cliente_id_oid " +
                 "join applicationuser a on a.id=h.abogado_id_oid " +
@@ -58,22 +63,37 @@ public class ReporteCliente {
 
     public void build() throws IOException, SQLException {
         buildDataSource();
-        JasperPdfExporterBuilder pdfExporter = buildPdfExporter();
-        //try {
-        rep = report();
-        rep.title(cmp.text("DynamicReports " + getFechaString("yyyy-MM-dd HH:mm:ss")));
-        rep.columns(
-                col.column("Cliente", "nombre", type.stringType()),
-                col.column("Abogado", "username", type.stringType()),
-                col.column("Consulta", "caso", type.stringType()),
-                col.column("Solicitado por", "solicitadopor", type.stringType()),
-                col.column("Forma servicio", "nombre", type.stringType()),
-                col.column("Fecha", "fecha", type.dateType()));
-        rep.setDataSource(sql, conn);
-        //rep.toPdf(pdfExporter);
-        // } catch (DRException e) {
-        //     e.printStackTrace();
-        //}
+        try {
+            JasperPdfExporterBuilder pdfExporter = buildPdfExporter();
+
+            TextColumnBuilder<String> itemColumn = col.column("Cliente", "nombre", type.stringType());
+            ColumnGroupBuilder itemGroup = grp.group(itemColumn)
+                    .setTitleWidth(40)
+                    .setHeaderLayout(GroupHeaderLayout.TITLE_AND_VALUE);
+
+            rep = report();
+            rep.title(cmp.text("DynamicReports " + getFechaString("yyyy-MM-dd HH:mm:ss")));
+            rep.highlightDetailEvenRows();
+            rep.groupBy(itemGroup);
+            StyleBuilder boldStyle = stl.style().bold();
+            StyleBuilder boldCenteredStyle = stl.style(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER);
+            StyleBuilder columnTitleStyle = stl.style(boldCenteredStyle).setBorder(stl.pen1Point());
+            rep.setColumnTitleStyle(columnTitleStyle);
+            rep.setDetailFooterSplitType(SplitType.PREVENT);
+            rep.columns(
+                    col.column("Abogado", "username", type.stringType()),
+                    col.column("Fecha", "fecha", type.dateType()),
+                    col.column("Consulta", "tipo_servicio", type.stringType()),
+                    col.column("Persona Solicitante", "solicitadopor", type.stringType()),
+                    col.column("Referencia", "caso", type.stringType()),
+                    col.column("Detalle de Consulta", "servicio", type.stringType()),
+                    col.column("Total", "tiemporeal", type.stringType()));
+            rep.pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle));
+            rep.setDataSource(sql, conn);
+            rep.toPdf(pdfExporter);
+        } catch (DRException e) {
+            e.printStackTrace();
+        }
     }
 
     private void buildDataSource() throws IOException, SQLException {
@@ -107,8 +127,7 @@ public class ReporteCliente {
         baos.flush();
         baos.close();
         LOG.info("baos: " + Integer.toString(baos.size()));
-        String nombreReporte = "ReporteCliente" + getFechaString("yyyy-MM-dd-HH-mm-ss") + ".pdf";
-        return new Blob(nombreReporte, "application/pdf", baos.toByteArray());
+        return new Blob(nombreReporte, "application/octet-stream", baos.toByteArray());
         //return baos.toByteArray();
     }
 
