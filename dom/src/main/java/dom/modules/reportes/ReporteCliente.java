@@ -2,10 +2,14 @@ package dom.modules.reportes;
 
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.JasperPdfExporterBuilder;
-import net.sf.dynamicreports.report.base.expression.AbstractSimpleExpression;
+import net.sf.dynamicreports.report.base.expression.AbstractValueFormatter;
+import net.sf.dynamicreports.report.builder.DynamicReports;
+import net.sf.dynamicreports.report.builder.VariableBuilder;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
+import net.sf.dynamicreports.report.builder.expression.AbstractComplexExpression;
 import net.sf.dynamicreports.report.builder.group.ColumnGroupBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
+import net.sf.dynamicreports.report.constant.Calculation;
 import net.sf.dynamicreports.report.constant.GroupHeaderLayout;
 import net.sf.dynamicreports.report.constant.HorizontalAlignment;
 import net.sf.dynamicreports.report.constant.SplitType;
@@ -19,17 +23,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import static net.sf.dynamicreports.report.builder.DynamicReports.*;
 
-
 public class ReporteCliente {
     private final static Logger LOG = LoggerFactory.getLogger(ReporteCliente.class);
+    private final static String HORAS = "Hora(s),";
+    private final static String MINUTOS = "Minuto(s)";
 
     String sql;
     Connection conn;
@@ -45,7 +48,8 @@ public class ReporteCliente {
     private void buildSql(int idCliente, Date desde, Date hasta) {
         String sqlTmp = "select h.fecha, h.cliente_id_oid, c.nombre, h.abogado_id_oid, a.username, h.fecha, h.formaservicio_id_oid,  " +
                 "f.nombre tipo_servicio, h.solicitadopor,h.caso,h.servicio,h.horasfacturables,h.minutosfacturables, " +
-                "concat(h.horasreales, ' Hora(s), ', h.minutosreales, ' Minuto(s)') tiemporeal " +
+                //"concat(h.horasreales, ' Hora(s), ', h.minutosreales, ' Minuto(s)') tiemporeal " +
+                "(horasfacturables * 3600 + minutosfacturables * 60) tiemporeal " +
                 "from hojadetiempo h " +
                 "join cliente c on c.id = h.cliente_id_oid " +
                 "join applicationuser a on a.id=h.abogado_id_oid " +
@@ -80,6 +84,8 @@ public class ReporteCliente {
             StyleBuilder columnTitleStyle = stl.style(boldCenteredStyle).setBorder(stl.pen1Point());
             rep.setColumnTitleStyle(columnTitleStyle);
             rep.setDetailFooterSplitType(SplitType.PREVENT);
+            TextColumnBuilder<Long> columnaTiempo = col.column("Total", "tiemporeal", type.longType()).setValueFormatter(new TiempoRealFormatter());
+            rep.subtotalsAtGroupFooter(itemGroup, sbt.customValue(new Total(itemGroup), columnaTiempo));
             rep.columns(
                     col.column("Abogado", "username", type.stringType()),
                     col.column("Fecha", "fecha", type.dateType()),
@@ -87,7 +93,7 @@ public class ReporteCliente {
                     col.column("Persona Solicitante", "solicitadopor", type.stringType()),
                     col.column("Referencia", "caso", type.stringType()),
                     col.column("Detalle de Consulta", "servicio", type.stringType()),
-                    col.column("Total", "tiemporeal", type.stringType()));
+                    columnaTiempo);
             rep.pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle));
             rep.setDataSource(sql, conn);
             rep.toPdf(pdfExporter);
@@ -115,20 +121,47 @@ public class ReporteCliente {
 
     public Blob buildBlob() throws FileNotFoundException, IOException, DRException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        //FileInputStream is;
-        //byte[] reporteBytes;
-        //File f = new File(finalFilename);
-        //LOG.info("finalFilename: " + f.length());
-        //is = new FileInputStream(finalFilename);
-        //reporteBytes = ByteStreams.toByteArray(is);
-        //LOG.info("reporteBytes: " + Integer.toString(reporteBytes.length));
-        //is.close();
         rep.toPdf(baos);
         baos.flush();
         baos.close();
         LOG.info("baos: " + Integer.toString(baos.size()));
         return new Blob(nombreReporte, "application/octet-stream", baos.toByteArray());
-        //return baos.toByteArray();
     }
 
+    public class TiempoRealFormatter extends AbstractValueFormatter<String, Long> {
+        private static final long serialVersionUID = 1L;
+
+        public TiempoRealFormatter() {
+        }
+
+        @Override
+        public String format(Long segundosReales, ReportParameters reportParameters) {
+            Long horas = segundosReales / 3600;
+            Long minutos = (segundosReales - (horas * 3600)) / 60;
+            String tiempo = String.format("%01d " + HORAS + " %02d " + MINUTOS, horas, minutos);
+            return tiempo;
+        }
+    }
+
+    class Total extends AbstractComplexExpression<String> {
+        private static final long serialVersionUID = 1L;
+
+        public Total(ColumnGroupBuilder group) {
+            VariableBuilder<Long> totalSegundos = DynamicReports.variable("tiemporeal", Long.class, Calculation.SUM);
+            if (group != null) {
+                totalSegundos.setResetGroup(group);
+            }
+            addExpression(totalSegundos);
+        }
+
+        @Override
+        public String evaluate(List<?> values, ReportParameters reportParameters) {
+            Long totalsecs = (Long) values.get(0);
+            Long horas = totalsecs / 3600;
+            Long minutos = (totalsecs - (horas * 3600)) / 60;
+            String tiempo = String.format("%01d " + HORAS + " %02d " + MINUTOS, horas, minutos);
+            return tiempo;
+        }
+
+    }
 }
