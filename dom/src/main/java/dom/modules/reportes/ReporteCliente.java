@@ -2,17 +2,15 @@ package dom.modules.reportes;
 
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.JasperPdfExporterBuilder;
+import net.sf.dynamicreports.report.base.expression.AbstractSimpleExpression;
 import net.sf.dynamicreports.report.base.expression.AbstractValueFormatter;
-import net.sf.dynamicreports.report.builder.DynamicReports;
 import net.sf.dynamicreports.report.builder.VariableBuilder;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
-import net.sf.dynamicreports.report.builder.expression.AbstractComplexExpression;
+import net.sf.dynamicreports.report.builder.component.ComponentBuilder;
+import net.sf.dynamicreports.report.builder.component.TextFieldBuilder;
 import net.sf.dynamicreports.report.builder.group.ColumnGroupBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
-import net.sf.dynamicreports.report.constant.Calculation;
-import net.sf.dynamicreports.report.constant.GroupHeaderLayout;
-import net.sf.dynamicreports.report.constant.HorizontalAlignment;
-import net.sf.dynamicreports.report.constant.SplitType;
+import net.sf.dynamicreports.report.constant.*;
 import net.sf.dynamicreports.report.definition.ReportParameters;
 import net.sf.dynamicreports.report.exception.DRException;
 import org.apache.isis.applib.value.Blob;
@@ -23,9 +21,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.List;
+import java.util.Locale;
 
 import static net.sf.dynamicreports.report.builder.DynamicReports.*;
 
@@ -48,13 +49,13 @@ public class ReporteCliente {
     private void buildSql(int idCliente, Date desde, Date hasta) {
         String sqlTmp = "select h.fecha, h.cliente_id_oid, c.nombre, h.abogado_id_oid, a.username, h.fecha, h.formaservicio_id_oid,  " +
                 "f.nombre tipo_servicio, h.solicitadopor,h.caso,h.servicio,h.horasfacturables,h.minutosfacturables, " +
-                //"concat(h.horasreales, ' Hora(s), ', h.minutosreales, ' Minuto(s)') tiemporeal " +
                 "(horasfacturables * 3600 + minutosfacturables * 60) tiemporeal " +
                 "from hojadetiempo h " +
                 "join cliente c on c.id = h.cliente_id_oid " +
                 "join applicationuser a on a.id=h.abogado_id_oid " +
                 "join formaservicio f on f.id = h.formaservicio_id_oid " +
-                "where c.id = %d and h.fecha >= '%TY-%Tm-%Td' and h.fecha <= '%TY-%Tm-%Td';";
+                "where c.id = %d and h.fecha >= '%TY-%Tm-%Td' and h.fecha <= '%TY-%Tm-%Td' " +
+                "order by a.username, h.fecha, h.caso";
         sql = String.format(sqlTmp, idCliente, desde, desde, desde, hasta, hasta, hasta);
         LOG.info(sql);
     }
@@ -67,39 +68,48 @@ public class ReporteCliente {
 
     public void build() throws IOException, SQLException {
         buildDataSource();
-        try {
-            JasperPdfExporterBuilder pdfExporter = buildPdfExporter();
+        JasperPdfExporterBuilder pdfExporter = buildPdfExporter();
 
-            TextColumnBuilder<String> itemColumn = col.column("Cliente", "nombre", type.stringType());
-            ColumnGroupBuilder itemGroup = grp.group(itemColumn)
-                    .setTitleWidth(40)
-                    .setHeaderLayout(GroupHeaderLayout.TITLE_AND_VALUE);
+        rep = report();
+        rep.setLocale(Locale.forLanguageTag("EN"));
 
-            rep = report();
-            rep.title(cmp.text("DynamicReports " + getFechaString("yyyy-MM-dd HH:mm:ss")));
-            rep.highlightDetailEvenRows();
-            rep.groupBy(itemGroup);
-            StyleBuilder boldStyle = stl.style().bold();
-            StyleBuilder boldCenteredStyle = stl.style(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER);
-            StyleBuilder columnTitleStyle = stl.style(boldCenteredStyle).setBorder(stl.pen1Point());
-            rep.setColumnTitleStyle(columnTitleStyle);
-            rep.setDetailFooterSplitType(SplitType.PREVENT);
-            TextColumnBuilder<Long> columnaTiempo = col.column("Total", "tiemporeal", type.longType()).setValueFormatter(new TiempoRealFormatter());
-            rep.subtotalsAtGroupFooter(itemGroup, sbt.customValue(new Total(itemGroup), columnaTiempo));
-            rep.columns(
-                    col.column("Abogado", "username", type.stringType()),
-                    col.column("Fecha", "fecha", type.dateType()),
-                    col.column("Consulta", "tipo_servicio", type.stringType()),
-                    col.column("Persona Solicitante", "solicitadopor", type.stringType()),
-                    col.column("Referencia", "caso", type.stringType()),
-                    col.column("Detalle de Consulta", "servicio", type.stringType()),
-                    columnaTiempo);
-            rep.pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle));
-            rep.setDataSource(sql, conn);
-            rep.toPdf(pdfExporter);
-        } catch (DRException e) {
-            e.printStackTrace();
-        }
+        rep.setPageFormat(PageType.A4, PageOrientation.PORTRAIT);
+        rep.pageHeader(cmp.horizontalList(
+                cmp.text(getFechaString("dd-MM-yyyy")).setHorizontalAlignment(HorizontalAlignment.LEFT),
+                cmp.image("/Users/miguel/Java/isis-hojadetiempo/webapp/src/main/webapp/logo.png").setHorizontalAlignment(HorizontalAlignment.RIGHT)));
+        rep.highlightDetailEvenRows();
+        rep.setDataSource(sql, conn);
+        rep.setDetailFooterSplitType(SplitType.PREVENT);
+        rep.pageHeader(cmp.verticalGap(10));
+        rep.columnHeader(cmp.verticalGap(10));
+        rep.addDetailFooter(cmp.verticalGap(5));
+        rep.addDetailHeader(cmp.verticalGap(5));
+
+        StyleBuilder arialStyle = stl.style().setFontName("Arial").setFontSize(8);
+        StyleBuilder columnTitleStyle = stl.style(arialStyle).bold().setFontSize(10).setHorizontalAlignment(HorizontalAlignment.CENTER).setBorder(stl.pen1Point());
+        StyleBuilder arialBoldStyle = stl.style(arialStyle).bold().setFontSize(14);
+        StyleBuilder piePaginaStyle = stl.style(arialStyle).bold().setFontSize(12).setHorizontalAlignment(HorizontalAlignment.CENTER);
+        StyleBuilder subtotalStyle = stl.style(arialStyle).bold().setFontSize(12).setTopBorder(stl.pen1Point()).setHorizontalAlignment(HorizontalAlignment.CENTER);
+        rep.setColumnTitleStyle(columnTitleStyle);
+        rep.pageFooter(cmp.pageXofY().setStyle(piePaginaStyle));
+
+        TextColumnBuilder<String> columnaCliente = col.column("", "nombre", type.stringType()).setStyle(arialBoldStyle);
+        ColumnGroupBuilder itemGroup = grp.group(columnaCliente).setHeaderLayout(GroupHeaderLayout.VALUE);
+        TextColumnBuilder<Long> columnaTiempo = col.column("Total", "tiemporeal", type.longType()).setValueFormatter(new TiempoRealFormatter());
+        VariableBuilder<Long> sumaTiempo = variable(columnaTiempo, Calculation.SUM);
+        rep.variables(sumaTiempo);
+        TextFieldBuilder<String> groupSbt = cmp.text(new CustomTextSubtotal(sumaTiempo)).setStyle(subtotalStyle);
+        rep.groupBy(itemGroup);
+        itemGroup.footer(groupSbt);
+
+        rep.columns(
+                col.column("Abogado", "username", type.stringType()).setStyle(arialStyle).setHorizontalAlignment(HorizontalAlignment.CENTER).setFixedColumns(6),
+                col.column("Fecha", "fecha", type.dateType()).setStyle(arialStyle).setHorizontalAlignment(HorizontalAlignment.CENTER).setFixedColumns(8),
+                col.column("Consulta", "tipo_servicio", type.stringType()).setStyle(arialStyle.setRightPadding(10)).setHorizontalAlignment(HorizontalAlignment.LEFT),
+                col.column("Persona Solicitante", "solicitadopor", type.stringType()).setStyle(arialStyle),
+                col.column("Referencia", "caso", type.stringType()).setStyle(arialStyle).setWidth(100),
+                col.column("Detalle de Consulta", "servicio", type.stringType()).setStyle(arialStyle).setWidth(170),
+                columnaTiempo.setStyle(arialStyle).setWidth(130));
     }
 
     private void buildDataSource() throws IOException, SQLException {
@@ -143,25 +153,23 @@ public class ReporteCliente {
         }
     }
 
-    class Total extends AbstractComplexExpression<String> {
+    private class CustomTextSubtotal extends AbstractSimpleExpression<String> {
         private static final long serialVersionUID = 1L;
 
-        public Total(ColumnGroupBuilder group) {
-            VariableBuilder<Long> totalSegundos = DynamicReports.variable("tiemporeal", Long.class, Calculation.SUM);
-            if (group != null) {
-                totalSegundos.setResetGroup(group);
-            }
-            addExpression(totalSegundos);
+        private VariableBuilder<Long> totalSegundosReales;
+
+        public CustomTextSubtotal(VariableBuilder<Long> segundosReales) {
+            this.totalSegundosReales = segundosReales;
         }
 
-        @Override
-        public String evaluate(List<?> values, ReportParameters reportParameters) {
-            Long totalsecs = (Long) values.get(0);
-            Long horas = totalsecs / 3600;
-            Long minutos = (totalsecs - (horas * 3600)) / 60;
-            String tiempo = String.format("%01d " + HORAS + " %02d " + MINUTOS, horas, minutos);
+        public String evaluate(ReportParameters reportParameters) {
+            Long segundosReales = reportParameters.getValue(totalSegundosReales);
+            Long horas = segundosReales / 3600;
+            Long minutos = (segundosReales - (horas * 3600)) / 60;
+            String tiempo = reportParameters.getValue("nombre") + " - " + String.format("%01d " + HORAS + " %02d " + MINUTOS, horas, minutos);
             return tiempo;
         }
-
     }
+
+
 }

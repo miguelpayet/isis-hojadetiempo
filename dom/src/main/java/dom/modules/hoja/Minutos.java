@@ -7,8 +7,10 @@ public class Minutos {
 
     public static List<Integer> getListaMinutosReales() {
         List<Integer> horas = new ArrayList<Integer>();
-        for (Integer i = 1; i <= 60; i++) {
-            horas.add(i);
+        for (Integer i = 0; i <= 59; i++) {
+            if ((i % 10) == 0) {
+                horas.add(i);
+            }
         }
         return horas;
     }
