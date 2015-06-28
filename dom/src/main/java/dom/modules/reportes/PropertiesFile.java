@@ -13,7 +13,7 @@ public class PropertiesFile {
 
     public PropertiesFile(String fileName) throws IOException {
         this.baseFilename = fileName;
-        this.fileName = new File(".").getAbsolutePath() + "/src/main/webapp/WEB-INF/" + fileName;
+        this.fileName = fileName;
         loadProperties();
     }
 
