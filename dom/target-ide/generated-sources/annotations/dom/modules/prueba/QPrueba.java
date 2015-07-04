@@ -1,7 +1,4 @@
-package dom.modules.prueba;
-
-import org.datanucleus.query.typesafe.*;
-import org.datanucleus.api.jdo.query.*;
+package dom.prueba;
 
 public class QPrueba extends PersistableExpressionImpl<Prueba> implements PersistableExpression<Prueba>
 {
