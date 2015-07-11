@@ -2,9 +2,8 @@ package dom.modules.reportes;
 
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.JasperPdfExporterBuilder;
-import net.sf.dynamicreports.report.base.expression.AbstractSimpleExpression;
 import net.sf.dynamicreports.report.base.expression.AbstractValueFormatter;
-import net.sf.dynamicreports.report.builder.VariableBuilder;
+import net.sf.dynamicreports.report.builder.component.PageXofYBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
 import net.sf.dynamicreports.report.constant.HorizontalAlignment;
 import net.sf.dynamicreports.report.constant.PageOrientation;
@@ -30,14 +29,13 @@ import static net.sf.dynamicreports.report.builder.DynamicReports.*;
 
 public abstract class ReporteBase {
 
-	protected final static String HORAS = "Hora(s),";
 	protected final static Logger LOG = LoggerFactory.getLogger(ReporteCliente.class);
-	protected final static String MINUTOS = "Minuto(s)";
 	StyleBuilder arialBoldStyle;
 	StyleBuilder arialStyle;
 	StyleBuilder columnTitleStyle;
 	Connection conn;
 	String finalFilename;
+	Idioma idioma;
 	String nombreReporte;
 	StyleBuilder piePaginaStyle;
 	JasperReportBuilder rep;
@@ -54,13 +52,15 @@ public abstract class ReporteBase {
 		public String format(Long segundosReales, ReportParameters reportParameters) {
 			Long horas = segundosReales / 3600;
 			Long minutos = (segundosReales - (horas * 3600)) / 60;
-			return String.format("%01d " + HORAS + " %02d " + MINUTOS, horas, minutos);
+			return String.format("%01d " + idioma.getString("horas") + " %02d " + idioma.getString("minutos"), horas,
+					minutos);
 		}
 	}
 
-	public ReporteBase() {
-		buildReporte();
+	public ReporteBase(Idioma idioma) {
+		this.idioma = idioma;
 		buildStyles();
+		buildReporte();
 	}
 
 	abstract void applySqlParams();
@@ -69,7 +69,6 @@ public abstract class ReporteBase {
 		buildSql();
 		buildDataSource();
 		rep.setDataSource(sql, conn);
-		rep.pageFooter(cmp.pageXofY().setStyle(piePaginaStyle));
 	}
 
 	public Blob buildBlob() throws IOException, DRException {
@@ -77,7 +76,7 @@ public abstract class ReporteBase {
 		rep.toPdf(baos);
 		baos.flush();
 		baos.close();
-		return new Blob(nombreReporte, "application/octet-stream", baos.toByteArray());
+		return new Blob(nombreReporte, "application/pdf", baos.toByteArray());
 	}
 
 	protected void buildDataSource() throws IOException, SQLException {
@@ -98,7 +97,7 @@ public abstract class ReporteBase {
 
 	protected void buildReporte() {
 		rep = report();
-		rep.setLocale(Locale.forLanguageTag("ES"));
+		rep.setLocale(Locale.forLanguageTag(idioma.getCodigo()));
 		rep.setPageFormat(PageType.A4, PageOrientation.PORTRAIT);
 		rep.pageHeader(cmp.horizontalList(
 				cmp.text(getFechaString("dd-MM-yyyy")).setHorizontalAlignment(HorizontalAlignment.LEFT),
@@ -110,6 +109,9 @@ public abstract class ReporteBase {
 		rep.addDetailFooter(cmp.verticalGap(5));
 		rep.addDetailHeader(cmp.verticalGap(5));
 		rep.detailFooter(cmp.line().setPen(stl.pen1Point()));
+		PageXofYBuilder pageXofYBuilder = cmp.pageXofY().setStyle(piePaginaStyle).setFormatExpression(idioma.getString
+				("paginador"));
+		rep.pageFooter(pageXofYBuilder);
 	}
 
 	protected void buildSql() {
@@ -147,6 +149,11 @@ public abstract class ReporteBase {
 				.setFontSize(12)
 				.setTopBorder(stl.pen1Point())
 				.setHorizontalAlignment(HorizontalAlignment.CENTER);
+	}
+
+	protected String formatearHoras(Long horas, Long minutos) {
+		return String.format("%01d " + idioma.getString("horas") + " %02d " + idioma.getString("minutos"), horas,
+				minutos);
 	}
 
 	public String getFechaString(String formato) {

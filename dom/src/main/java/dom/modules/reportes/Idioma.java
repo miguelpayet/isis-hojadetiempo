@@ -22,7 +22,7 @@ public class Idioma {
 	private String codigo;
 	private String nombre;
 	private boolean porDefault;
-	private HashMap<String, String> strings;
+	private HashMap<String, String> strings = new HashMap<>();
 
 	public Idioma() {
 	}
@@ -45,9 +45,9 @@ public class Idioma {
 
 	public String getString(String name) {
 		String valor = "nulo";
-		if (strings == null) {
-			loadStrings(codigo);
-		}
+		//if (strings.isEmpty()) {
+		loadStrings(codigo);
+		//∫}
 		if (strings.containsKey(name)) {
 			valor = strings.get(name).toString();
 		}
@@ -57,26 +57,34 @@ public class Idioma {
 	private void loadStrings(String codigo) {
 		switch (codigo) {
 			case "en":
-				strings.put("paginador", "Page {0} of {1}");
-				strings.put("campo-tipo-servicio", "tipo_servicio_en");
-				strings.put("titulo-cliente", "Client");
 				strings.put("abogado", "Attorney");
-				strings.put("fecha", "Date");
+				strings.put("campo-tipo-servicio", "tipo_servicio_en");
+				strings.put("cliente", "Client");
 				strings.put("consulta", "Query");
-				strings.put("solicitante", "Applicant");
-				strings.put("referencia", "Reference");
 				strings.put("detalles", "Details");
+				strings.put("fecha", "Date");
+				strings.put("horas", "Hour(s),");
+				strings.put("minutos", "Minute(s)");
+				strings.put("paginador", "Page {0} of {1}");
+				strings.put("referencia", "Reference");
+				strings.put("solicitante", "Applicant");
+				strings.put("tiempo-facturable", "Billable");
+				strings.put("tiempo-real", "Real");
 				break;
 			case "es":
-				strings.put("paginador", "Página {0} de {1}");
-				strings.put("detalles", "Detalles");
-				strings.put("campo-tipo-servicio", "tipo_servicio");
-				strings.put("titulo-cliente", "Cliente");
 				strings.put("abogado", "Abogado");
-				strings.put("fecha", "Fecha");
+				strings.put("campo-tipo-servicio", "tipo_servicio");
+				strings.put("cliente", "Cliente");
 				strings.put("consulta", "Consulta");
-				strings.put("solicitante", "Solicitante");
+				strings.put("detalles", "Detalles");
+				strings.put("fecha", "Fecha");
+				strings.put("horas", "Hora(s),");
+				strings.put("minutos", "Minuto(s)");
+				strings.put("paginador", "Página {0} de {1}");
 				strings.put("referencia", "Referencia");
+				strings.put("solicitante", "Solicitante");
+				strings.put("tiempo-facturable", "Facturable");
+				strings.put("tiempo-real", "Real");
 				break;
 		}
 	}

@@ -27,8 +27,9 @@ public class ReportesService extends BaseService {
 	ApplicationRoles applicationRoles;
 	@Inject
 	ClienteService clienteService;
+	@Inject
+	IdiomaService idiomaService;
 
-	@Programmatic
 	public List<Cliente> autoComplete0ReportePorCliente(final String name) {
 		return autoCompleteCliente(name);
 	}
@@ -40,7 +41,6 @@ public class ReportesService extends BaseService {
 	@Programmatic
 	public List<Cliente> autoCompleteCliente(final String name) {
 		return clienteService.findClientesByName(name);
-
 	}
 
 	public SortedSet<ApplicationUser> choices0ReportePorAbogado() {
@@ -74,6 +74,23 @@ public class ReportesService extends BaseService {
 		return abogados;
 	}
 
+	public Idioma default3ReportePorAbogado() {
+		return getIdiomaDefault();
+	}
+
+	public Idioma default3ReportePorCliente() {
+		return getIdiomaDefault();
+	}
+
+	public Idioma default3ReportePorClienteYCaso() {
+		return getIdiomaDefault();
+	}
+
+	@Programmatic
+	public Idioma getIdiomaDefault() {
+		return idiomaService.getIdiomaDefault();
+	}
+
 	@Programmatic
 	public List<String> getListaCasos(Cliente cliente, java.util.Date desde) {
 		java.util.Date hasta = ajustadorFecha.getUltimoDia(new java.sql.Date(desde.getTime()));
@@ -86,29 +103,32 @@ public class ReportesService extends BaseService {
 			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Abogado") final ApplicationUser
 					abogado,
 			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Desde") final Date desde,
-			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Hasta") final Date hasta) {
+			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Hasta") final Date hasta,
+			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Idioma") final Idioma idioma) {
 		Date desdeAjustado = ajustadorFecha.ajustarFechaInicial(desde);
 		Date hastaAjustado = ajustadorFecha.ajustarFechaFinal(hasta);
 		ReporteAbogado rep = null;
 		try {
-			rep = new ReporteAbogado(abogado, ajustadorFecha.ajustarFechaInicial(desde), ajustadorFecha
+			rep = new ReporteAbogado(idioma, abogado, ajustadorFecha.ajustarFechaInicial(desde), ajustadorFecha
 					.ajustarFechaFinal(hasta));
 			rep.build();
 			return rep.buildBlob();
 		} catch (SQLException | IOException | DRException e) {
 			e.printStackTrace();
 		}
-		return null;}
+		return null;
+	}
 
 	@ActionLayout(bookmarking = BookmarkPolicy.NEVER, named = "Reporte por cliente")
 	@MemberOrder(sequence = "1")
 	public Blob reportePorCliente(
 			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Cliente") final Cliente cliente,
 			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Desde") final Date desde,
-			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Hasta") final Date hasta) {
+			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Hasta") final Date hasta,
+			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Idioma") final Idioma idioma) {
 		ReporteCliente rep = null;
 		try {
-			rep = new ReporteCliente(cliente, ajustadorFecha.ajustarFechaInicial(desde), ajustadorFecha
+			rep = new ReporteCliente(idioma, cliente, ajustadorFecha.ajustarFechaInicial(desde), ajustadorFecha
 					.ajustarFechaFinal(hasta));
 			rep.build();
 			return rep.buildBlob();
@@ -123,12 +143,13 @@ public class ReportesService extends BaseService {
 	public Blob reportePorClienteYCaso(
 			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Cliente") final Cliente cliente,
 			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Mes") final Mes mes,
-			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Caso") final String caso) {
+			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Caso") final String caso,
+			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Idioma") final Idioma idioma) {
 		ReporteClienteCaso rep = null;
 		try {
 			Date desde = ajustadorFecha.ajustarFechaInicial(mes.getFecha());
 			Date hasta = ajustadorFecha.ajustarFechaInicial(ajustadorFecha.getUltimoDia(desde));
-			rep = new ReporteClienteCaso(cliente, desde, hasta, caso);
+			rep = new ReporteClienteCaso(idioma, cliente, desde, hasta, caso);
 			rep.build();
 			return rep.buildBlob();
 		} catch (SQLException | IOException | DRException e) {

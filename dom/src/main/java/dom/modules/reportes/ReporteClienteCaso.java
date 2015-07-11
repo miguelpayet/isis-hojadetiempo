@@ -8,8 +8,8 @@ public class ReporteClienteCaso extends ReporteCliente {
 
 	String caso;
 
-	public ReporteClienteCaso(Cliente cliente, Date desde, Date hasta, String caso) {
-		super(cliente, desde, hasta);
+	public ReporteClienteCaso(Idioma idioma, Cliente cliente, Date desde, Date hasta, String caso) {
+		super(idioma, cliente, desde, hasta);
 		this.caso = caso;
 		setNombre("RCC", cliente.getNombre());
 	}

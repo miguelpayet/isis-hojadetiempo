@@ -35,12 +35,12 @@ public class ReporteAbogado extends ReporteBase {
 			Long segundosReales = reportParameters.getValue(totalSegundosReales);
 			Long horas = segundosReales / 3600;
 			Long minutos = (segundosReales - (horas * 3600)) / 60;
-			return reportParameters.getValue("username") + " - " + String.format("%01d " + HORAS + " %02d " + MINUTOS,
-					horas, minutos);
+			return reportParameters.getValue("username") + " - " + formatearHoras(horas, minutos);
 		}
 	}
 
-	public ReporteAbogado(ApplicationUser abogado, Date desde, Date hasta) {
+	public ReporteAbogado(Idioma idioma, ApplicationUser abogado, Date desde, Date hasta) {
+		super(idioma);
 		this.abogado = abogado;
 		this.desde = desde;
 		this.hasta = hasta;
@@ -57,9 +57,11 @@ public class ReporteAbogado extends ReporteBase {
 		TextColumnBuilder<String> columnaAbogado = col.column("", "username", type.stringType()).setStyle
 				(arialBoldStyle);
 		ColumnGroupBuilder itemGroup = grp.group(columnaAbogado).setHideColumn(true);
-		TextColumnBuilder<Long> columnaTiempoReal = col.column("Real", "tiemporeal", type.longType()).
+		TextColumnBuilder<Long> columnaTiempoReal = col.column(idioma.getString("tiempo-real"), "tiemporeal", type
+				.longType()).
 				setValueFormatter(new TiempoRealFormatter());
-		TextColumnBuilder<Long> columnaTiempoFact = col.column("Facturable", "tiempofacturable", type.longType())
+		TextColumnBuilder<Long> columnaTiempoFact = col.column(idioma.getString("tiempo-facturable"),
+				"tiempofacturable", type.longType())
 				.setValueFormatter(new TiempoRealFormatter());
 		VariableBuilder<Long> sumaTiempoReal = variable(columnaTiempoReal, Calculation.SUM);
 		VariableBuilder<Long> sumaTiempoFact = variable(columnaTiempoReal, Calculation.SUM);
@@ -69,28 +71,28 @@ public class ReporteAbogado extends ReporteBase {
 		itemGroup.footer(groupSbt);
 
 		rep.columns(
-				col.column("Cliente", "nombre", type.stringType())
+				col.column(idioma.getString("cliente"), "nombre", type.stringType())
 						.setWidth(60)
 						.setHorizontalAlignment(HorizontalAlignment.CENTER)
 						.setStyle(arialStyle)
 						.setTitleStyle(columnTitleStyle.setLeftBorder(stl.pen1Point())),
-				col.column("Fecha", "fecha", type.dateType())
+				col.column(idioma.getString("fecha"), "fecha", type.dateType())
 						.setFixedColumns(8)
 						.setHorizontalAlignment(HorizontalAlignment.CENTER)
 						.setStyle(arialStyle)
 						.setTitleStyle(columnTitleStyle),
-				col.column("Consulta", "tipo_servicio", type.stringType())
+				col.column(idioma.getString("consulta"), idioma.getString("campo-tipo-servicio"), type.stringType())
 						.setHorizontalAlignment(HorizontalAlignment.LEFT)
 						.setStyle(arialStyle.setRightPadding(10))
 						.setTitleStyle(columnTitleStyle),
-				col.column("Solicitante", "solicitadopor", type.stringType())
+				col.column(idioma.getString("solicitante"), "solicitadopor", type.stringType())
 						.setStyle(arialStyle)
 						.setTitleStyle(columnTitleStyle),
-				col.column("Referencia", "caso", type.stringType())
+				col.column(idioma.getString("referencia"), "caso", type.stringType())
 						.setTitleStyle(columnTitleStyle)
 						.setStyle(arialStyle)
 						.setWidth(100),
-				col.column("Detalle", "servicio", type.stringType())
+				col.column(idioma.getString("detalles"), "servicio", type.stringType())
 						.setTitleStyle(columnTitleStyle)
 						.setStyle(arialStyle)
 						.setWidth(100),
@@ -108,8 +110,8 @@ public class ReporteAbogado extends ReporteBase {
 	}
 
 	protected void buildSqlSelect() {
-		sql = "SELECT h.fecha, c.nombre, a.username, f.nombre tipo_servicio, h.solicitadopor, h.caso, h.servicio, " +
-				"(horasreales * 3600 + minutosreales * 60) tiemporeal, " +
+		sql = "SELECT h.fecha, c.nombre, a.username, f.nombre tipo_servicio,  f.nombreingles tipo_servicio_en, " +
+				"h.solicitadopor, h.caso, h.servicio, (horasreales * 3600 + minutosreales * 60) tiemporeal, " +
 				"(horasfacturables * 3600 + minutosfacturables * 60) tiempofacturable " +
 				"FROM hojadetiempo h " +
 				"JOIN cliente c ON c.id = h.cliente_id_oid " +

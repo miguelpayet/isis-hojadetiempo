@@ -35,13 +35,12 @@ public class ReporteCliente extends ReporteBase {
 			Long segundosReales = reportParameters.getValue(totalSegundosReales);
 			Long horas = segundosReales / 3600;
 			Long minutos = (segundosReales - (horas * 3600)) / 60;
-			return reportParameters.getValue("nombre") + " - " + String.format("%01d " + HORAS + " %02d " + MINUTOS,
-					horas, minutos);
+			return reportParameters.getValue("nombre") + " - " + formatearHoras(horas, minutos);
 		}
 	}
 
-	public ReporteCliente(Cliente cliente, Date desde, Date hasta) {
-		super();
+	public ReporteCliente(Idioma idioma, Cliente cliente, Date desde, Date hasta) {
+		super(idioma);
 		this.cliente = cliente;
 		this.desde = desde;
 		this.hasta = hasta;
@@ -66,28 +65,28 @@ public class ReporteCliente extends ReporteBase {
 		itemGroup.footer(groupSbt);
 
 		rep.columns(
-				col.column("Abogado", "username", type.stringType())
+				col.column(idioma.getString("abogado"), "username", type.stringType())
 						.setFixedColumns(6)
 						.setHorizontalAlignment(HorizontalAlignment.CENTER)
 						.setStyle(arialStyle)
 						.setTitleStyle(columnTitleStyle.setLeftBorder(stl.pen1Point())),
-				col.column("Fecha", "fecha", type.dateType())
+				col.column(idioma.getString("fecha"), "fecha", type.dateType())
 						.setFixedColumns(8)
 						.setHorizontalAlignment(HorizontalAlignment.CENTER)
 						.setStyle(arialStyle)
 						.setTitleStyle(columnTitleStyle),
-				col.column("Consulta", "tipo_servicio", type.stringType())
+				col.column(idioma.getString("consulta"), idioma.getString("campo-tipo-servicio"), type.stringType())
 						.setHorizontalAlignment(HorizontalAlignment.LEFT)
 						.setStyle(arialStyle.setRightPadding(10))
 						.setTitleStyle(columnTitleStyle),
-				col.column("Solicitante", "solicitadopor", type.stringType())
+				col.column(idioma.getString("solicitante"), "solicitadopor", type.stringType())
 						.setStyle(arialStyle)
 						.setTitleStyle(columnTitleStyle),
-				col.column("Referencia", "caso", type.stringType())
+				col.column(idioma.getString("referencia"), "caso", type.stringType())
 						.setTitleStyle(columnTitleStyle)
 						.setStyle(arialStyle)
 						.setWidth(100),
-				col.column("Detalle", "servicio", type.stringType())
+				col.column(idioma.getString("detalles"), "servicio", type.stringType())
 						.setTitleStyle(columnTitleStyle)
 						.setStyle(arialStyle)
 						.setWidth(170),
@@ -102,8 +101,8 @@ public class ReporteCliente extends ReporteBase {
 	}
 
 	protected void buildSqlSelect() {
-		sql = "select h.fecha, c.nombre, a.username, f.nombre tipo_servicio, h.solicitadopor, " +
-				"h.caso, h.servicio, (horasfacturables * 3600 + minutosfacturables * 60) tiemporeal " +
+		sql = "select h.fecha, c.nombre, a.username, f.nombre tipo_servicio, f.nombreingles tipo_servicio_en, " +
+				"h.solicitadopor,  h.caso, h.servicio, (horasfacturables * 3600 + minutosfacturables * 60) tiemporeal " +
 				"from hojadetiempo h " +
 				"join cliente c on c.id = h.cliente_id_oid " +
 				"join applicationuser a on a.id=h.abogado_id_oid " +
