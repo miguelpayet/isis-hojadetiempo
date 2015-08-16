@@ -14,7 +14,7 @@ public class FormaServicioService {
 
     @MemberOrder(sequence = "3")
     @ActionLayout(bookmarking = BookmarkPolicy.NEVER, named = "Crear forma de servicio")
-    public FormaServicio create(final @ParameterLayout(named = "Name") String name) {
+    public FormaServicio create(final @ParameterLayout(named = "Nombre") String name) {
         final FormaServicio obj = container.newTransientInstance(FormaServicio.class);
         obj.setNombre(name);
         container.persistIfNotAlready(obj);
