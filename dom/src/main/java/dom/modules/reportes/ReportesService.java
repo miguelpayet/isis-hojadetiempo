@@ -1,6 +1,7 @@
 package dom.modules.reportes;
 
 import dom.modules.BaseService;
+import dom.modules.clientes.Caso;
 import dom.modules.clientes.Cliente;
 import dom.modules.clientes.ClienteService;
 import dom.modules.hoja.HojaDeTiempoService;
@@ -55,11 +56,10 @@ public class ReportesService extends BaseService {
 		}
 	}
 
-	public SortedSet<String> choices2ReportePorClienteYCaso(final Cliente cliente, final Mes mes) {
-		SortedSet<String> lista = null;
-		if (cliente != null && mes != null) {
-			Date fechaMes = mes.getFecha();
-			lista = new TreeSet<String>(getListaCasos(cliente, fechaMes));
+	public SortedSet<Caso> choices2ReportePorClienteYCaso(final Cliente cliente) {
+		SortedSet<Caso> lista = null;
+		if (cliente != null) {
+			lista = getListaCasos(cliente);
 		}
 		return lista;
 	}
@@ -92,9 +92,8 @@ public class ReportesService extends BaseService {
 	}
 
 	@Programmatic
-	public List<String> getListaCasos(Cliente cliente, java.util.Date desde) {
-		java.util.Date hasta = ajustadorFecha.getUltimoDia(new java.sql.Date(desde.getTime()));
-		return clienteService.getCasos(cliente, desde, hasta);
+	public SortedSet<Caso> getListaCasos(Cliente cliente) {
+		return cliente.getCasos();
 	}
 
 	@ActionLayout(bookmarking = BookmarkPolicy.NEVER, named = "Reporte por abogado")
@@ -143,7 +142,7 @@ public class ReportesService extends BaseService {
 	public Blob reportePorClienteYCaso(
 			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Cliente") final Cliente cliente,
 			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Mes") final Mes mes,
-			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Caso") final String caso,
+			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Caso") final Caso caso,
 			@Parameter(optionality = Optionality.MANDATORY) @ParameterLayout(named = "Idioma") final Idioma idioma) {
 		ReporteClienteCaso rep = null;
 		try {

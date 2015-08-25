@@ -1,24 +1,25 @@
 package dom.modules.reportes;
 
+import dom.modules.clientes.Caso;
 import dom.modules.clientes.Cliente;
 
 import java.sql.Date;
 
 public class ReporteClienteCaso extends ReporteCliente {
 
-	String caso;
+	Caso caso;
 
-	public ReporteClienteCaso(Idioma idioma, Cliente cliente, Date desde, Date hasta, String caso) {
+	public ReporteClienteCaso(Idioma idioma, Cliente cliente, Date desde, Date hasta, Caso caso) {
 		super(idioma, cliente, desde, hasta);
 		this.caso = caso;
 		setNombre("RCC", cliente.getNombre());
 	}
 
 	protected void applySqlParams() {
-		sql = String.format(sql, cliente.getId(), desde, desde, desde, hasta, hasta, hasta, caso);
+		sql = String.format(sql, cliente.getId(), desde, desde, desde, hasta, hasta, hasta, caso.getCodigo());
 	}
 
 	protected void buildSqlWhere() {
-		sql = sql + " where c.id = %d and h.fecha >= '%TY-%Tm-%Td' and h.fecha <= '%TY-%Tm-%Td' and h.caso = '%s'";
+		sql = sql + " where c.id = %d and h.fecha >= '%TY-%Tm-%Td' and h.fecha <= '%TY-%Tm-%Td' and ca.caso_id_oid = '%s'";
 	}
 }

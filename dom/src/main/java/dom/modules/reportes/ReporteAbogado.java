@@ -40,7 +40,7 @@ public class ReporteAbogado extends ReporteBase {
 	}
 
 	public ReporteAbogado(Idioma idioma, ApplicationUser abogado, Date desde, Date hasta) {
-		super(idioma);
+		super(idioma, abogado.getName());
 		this.abogado = abogado;
 		this.desde = desde;
 		this.hasta = hasta;
@@ -107,16 +107,6 @@ public class ReporteAbogado extends ReporteBase {
 
 	protected void buildSqlOrder() {
 		sql = sql + " order by a.username, h.fecha, h.caso";
-	}
-
-	protected void buildSqlSelect() {
-		sql = "SELECT h.fecha, c.nombre, a.username, f.nombre tipo_servicio,  f.nombreingles tipo_servicio_en, " +
-				"h.solicitadopor, h.caso, h.servicio, (horasreales * 3600 + minutosreales * 60) tiemporeal, " +
-				"(horasfacturables * 3600 + minutosfacturables * 60) tiempofacturable " +
-				"FROM hojadetiempo h " +
-				"JOIN cliente c ON c.id = h.cliente_id_oid " +
-				"JOIN applicationuser a ON a.id = h.abogado_id_oid " +
-				"JOIN formaservicio f ON f.id = h.formaservicio_id_oid ";
 	}
 
 	protected void buildSqlWhere() {

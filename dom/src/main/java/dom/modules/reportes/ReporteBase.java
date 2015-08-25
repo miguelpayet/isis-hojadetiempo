@@ -2,13 +2,12 @@ package dom.modules.reportes;
 
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.JasperPdfExporterBuilder;
+import net.sf.dynamicreports.report.base.expression.AbstractSimpleExpression;
 import net.sf.dynamicreports.report.base.expression.AbstractValueFormatter;
+import net.sf.dynamicreports.report.builder.column.ColumnBuilder;
 import net.sf.dynamicreports.report.builder.component.PageXofYBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
-import net.sf.dynamicreports.report.constant.HorizontalAlignment;
-import net.sf.dynamicreports.report.constant.PageOrientation;
-import net.sf.dynamicreports.report.constant.PageType;
-import net.sf.dynamicreports.report.constant.SplitType;
+import net.sf.dynamicreports.report.constant.*;
 import net.sf.dynamicreports.report.definition.ReportParameters;
 import net.sf.dynamicreports.report.exception.DRException;
 import org.apache.isis.applib.value.Blob;
@@ -41,6 +40,23 @@ public abstract class ReporteBase {
 	JasperReportBuilder rep;
 	protected String sql;
 	StyleBuilder subtotalStyle;
+	String titulo;
+
+	protected class HeaderReporteExpression extends AbstractSimpleExpression<String> {
+		String valor;
+
+		public HeaderReporteExpression(String valor) {
+			this.valor = valor;
+		}
+
+		public String evaluate(ReportParameters reportParameters) {
+			if (reportParameters.getPageNumber() == 1) {
+				return valor;
+			} else {
+				return "";
+			}
+		}
+	}
 
 	protected class TiempoRealFormatter extends AbstractValueFormatter<String, Long> {
 		private static final long serialVersionUID = 1L;
@@ -57,8 +73,9 @@ public abstract class ReporteBase {
 		}
 	}
 
-	public ReporteBase(Idioma idioma) {
+	public ReporteBase(Idioma idioma, String titulo) {
 		this.idioma = idioma;
+		this.titulo = titulo;
 		buildStyles();
 		buildReporte();
 	}
@@ -99,10 +116,11 @@ public abstract class ReporteBase {
 		rep = report();
 		rep.setLocale(Locale.forLanguageTag(idioma.getCodigo()));
 		rep.setPageFormat(PageType.A4, PageOrientation.PORTRAIT);
-		rep.pageHeader(cmp.horizontalList(
-				cmp.text(getFechaString("dd-MM-yyyy")).setHorizontalAlignment(HorizontalAlignment.LEFT),
-				cmp.image(getClass().getClassLoader().getResourceAsStream("images/logo.png")).setDimension(75, 75)
-						.setHorizontalAlignment(HorizontalAlignment.RIGHT)));
+		rep.pageHeader(cmp.verticalList(cmp.horizontalList(
+						cmp.text(getFechaString("dd-MM-yyyy")).setHorizontalTextAlignment(HorizontalTextAlignment.LEFT),
+						cmp.image(getClass().getClassLoader().getResourceAsStream("images/logo.png")).setDimension(75, 75)
+								.setHorizontalImageAlignment(HorizontalImageAlignment.RIGHT))),
+				cmp.text(new HeaderReporteExpression(titulo)).setStyle(arialBoldStyle));
 		rep.setDetailFooterSplitType(SplitType.PREVENT);
 		rep.pageHeader(cmp.verticalGap(10));
 		rep.columnHeader(cmp.verticalGap(10));
@@ -124,31 +142,83 @@ public abstract class ReporteBase {
 
 	abstract void buildSqlOrder();
 
-	abstract void buildSqlSelect();
+	protected void buildSqlSelect() {
+		sql = "SELECT h.fecha, c.nombre, a.username, f.nombre tipo_servicio,  f.nombreingles tipo_servicio_en, " +
+				"h.solicitadopor, ca.nombre caso, h.servicio, (horasreales * 3600 + minutosreales * 60) tiemporeal, " +
+				"(horasfacturables * 3600 + minutosfacturables * 60) tiempofacturable " +
+				"FROM hojadetiempo h " +
+				"JOIN cliente c ON c.id = h.cliente_id_oid " +
+				"JOIN caso ca on ca.id = h.caso_id_oid " +
+				"JOIN applicationuser a ON a.id = h.abogado_id_oid " +
+				"JOIN formaservicio f ON f.id = h.formaservicio_id_oid ";
+	}
 
 	abstract void buildSqlWhere();
 
 	protected void buildStyles() {
 		arialStyle = stl.style()
-				.setFontName("Arial")
+				.setFontName("Arial").setPadding(0).setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)
 				.setFontSize(8);
 		columnTitleStyle = stl.style(arialStyle)
 				.bold().setFontSize(10)
-				.setHorizontalAlignment(HorizontalAlignment.CENTER)
+				.setPadding(0)
+				.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)
 				.setTopBorder(stl.pen1Point().setLineColor(Color.GRAY))
 				.setBottomBorder(stl.pen1Point().setLineColor(Color.GRAY));
-		arialBoldStyle = stl
-				.style(arialStyle).bold()
+		arialBoldStyle = stl.style(arialStyle).bold()
 				.setFontSize(14);
 		piePaginaStyle = stl.style(arialStyle)
 				.bold()
-				.setFontSize(12)
-				.setHorizontalAlignment(HorizontalAlignment.CENTER);
+				.setFontSize(10)
+				.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER);
 		subtotalStyle = stl.style(arialStyle)
 				.bold()
 				.setFontSize(12)
 				.setTopBorder(stl.pen1Point())
-				.setHorizontalAlignment(HorizontalAlignment.CENTER);
+				.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER);
+	}
+
+	protected ColumnBuilder columnaAbogado() {
+		return col.column(idioma.getString("abogado"), "username", type.stringType())
+				.setWidth(70)
+				.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)
+				.setStyle(arialStyle)
+				.setTitleStyle(columnTitleStyle.setLeftBorder(stl.pen1Point()));
+	}
+
+	protected ColumnBuilder columnaConsulta() {
+		return col.column(idioma.getString("consulta"), idioma.getString("campo-tipo-servicio"), type.stringType())
+				.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)
+				.setStyle(arialStyle.setRightPadding(10))
+				.setTitleStyle(columnTitleStyle);
+	}
+
+	protected ColumnBuilder columnaDetalles() {
+		return col.column(idioma.getString("detalles"), "servicio", type.stringType())
+				.setTitleStyle(columnTitleStyle)
+				.setStyle(arialStyle)
+				.setWidth(170);
+	}
+
+	protected ColumnBuilder columnaFecha() {
+		return col.column(idioma.getString("fecha"), "fecha", type.dateType())
+				.setWidth(70)
+				.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)
+				.setStyle(arialStyle)
+				.setTitleStyle(columnTitleStyle);
+	}
+
+	protected ColumnBuilder columnaReferencia() {
+		return col.column(idioma.getString("referencia"), "caso", type.stringType())
+				.setTitleStyle(columnTitleStyle)
+				.setStyle(arialStyle)
+				.setWidth(100);
+	}
+
+	protected ColumnBuilder columnaSolicitante() {
+		return col.column(idioma.getString("solicitante"), "solicitadopor", type.stringType())
+				.setStyle(arialStyle)
+				.setTitleStyle(columnTitleStyle);
 	}
 
 	protected String formatearHoras(Long horas, Long minutos) {

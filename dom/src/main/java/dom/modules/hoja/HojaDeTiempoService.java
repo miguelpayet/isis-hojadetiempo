@@ -45,20 +45,6 @@ public class HojaDeTiempoService extends AbstractFactoryAndRepository {
 		return autoCompleteCliente(name);
 	}
 
-	public List<Caso> autoComplete5Registrar(final ApplicationUser abogado, final Cliente cliente, final FormaServicio
-			formaServicio) {
-		if (cliente != null) {
-			return autoCompleteCasos(cliente);
-		} else {
-			return null;
-		}
-	}
-
-	@Programmatic
-	public List<Caso> autoCompleteCasos(Cliente cliente) {
-		return clienteService.getCasos(cliente);
-	}
-
 	@Programmatic
 	public List<Cliente> autoCompleteCliente(final String name) {
 		return clienteService.findClientesByName(name);
@@ -101,6 +87,22 @@ public class HojaDeTiempoService extends AbstractFactoryAndRepository {
 		return getListaMinutosFacturables();
 	}
 
+	public List<Caso> choices4RegistrarSinAbogado(final Cliente cliente) {
+		if (cliente != null) {
+			return choicesCasos(cliente);
+		} else {
+			return null;
+		}
+	}
+
+	public List<Caso> choices5Registrar(final ApplicationUser abogado, final Cliente cliente) {
+		if (cliente != null) {
+			return choicesCasos(cliente);
+		} else {
+			return null;
+		}
+	}
+
 	public List<Integer> choices6RegistrarSinAbogado() {
 		return getListaHorasReales();
 	}
@@ -127,6 +129,11 @@ public class HojaDeTiempoService extends AbstractFactoryAndRepository {
 
 	public List<Integer> choices9RegistrarSinAbogado() {
 		return getListaMinutosFacturables();
+	}
+
+	@Programmatic
+	public List<Caso> choicesCasos(Cliente cliente) {
+		return clienteService.listarCasos(cliente);
 	}
 
 	@ActionLayout(bookmarking = BookmarkPolicy.NEVER, named = "Consultar por abogado y fecha")

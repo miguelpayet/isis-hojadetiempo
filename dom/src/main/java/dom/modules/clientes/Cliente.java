@@ -14,7 +14,7 @@ import java.util.SortedSet;
 		@Query(name = "find", language = "JDOQL", value = "SELECT FROM dom.modules.clientes.Cliente"),
 		@Query(name = "findByName",
 				language = "JDOQL",
-				value = "SELECT FROM dom.modules.clientes.Cliente WHERE nombre.indexOf(:nombre) >= 0"),
+				value = "SELECT FROM dom.modules.clientes.Cliente WHERE nombre.toUpperCase().indexOf(:name.toUpperCase()) >= 0"),
 		@Query(name = "findByNameContaining",
 				language = "JDOQL",
 				value = "SELECT FROM dom.modules.clientes.Cliente WHERE nombre.matches(:nameRegex)")})
