@@ -30,6 +30,9 @@ public abstract class ReporteBase {
 
 	protected final static Logger LOG = LoggerFactory.getLogger(ReporteCliente.class);
 	StyleBuilder arialBoldStyle;
+	StyleBuilder arialCenterStyle;
+	StyleBuilder arialLeftStyle;
+	StyleBuilder arialRightStyle;
 	StyleBuilder arialStyle;
 	StyleBuilder columnTitleStyle;
 	Connection conn;
@@ -117,7 +120,7 @@ public abstract class ReporteBase {
 		rep.setLocale(Locale.forLanguageTag(idioma.getCodigo()));
 		rep.setPageFormat(PageType.A4, PageOrientation.PORTRAIT);
 		rep.pageHeader(cmp.verticalList(cmp.horizontalList(
-						cmp.text(getFechaString("dd-MM-yyyy")).setHorizontalTextAlignment(HorizontalTextAlignment.LEFT),
+						cmp.text(getFechaString("dd/MM/yyyy")).setHorizontalTextAlignment(HorizontalTextAlignment.LEFT),
 						cmp.image(getClass().getClassLoader().getResourceAsStream("images/logo.png")).setDimension(75, 75)
 								.setHorizontalImageAlignment(HorizontalImageAlignment.RIGHT))),
 				cmp.text(new HeaderReporteExpression(titulo)).setStyle(arialBoldStyle));
@@ -144,7 +147,8 @@ public abstract class ReporteBase {
 
 	protected void buildSqlSelect() {
 		sql = "SELECT h.fecha, c.nombre, a.username, f.nombre tipo_servicio,  f.nombreingles tipo_servicio_en, " +
-				"h.solicitadopor, ca.nombre caso, h.servicio, (horasreales * 3600 + minutosreales * 60) tiemporeal, " +
+				"upper(h.solicitadopor) solicitadopor, upper(ca.nombre) caso, upper(h.servicio) servicio, " +
+				"(horasreales * 3600 + minutosreales * 60) tiemporeal, " +
 				"(horasfacturables * 3600 + minutosfacturables * 60) tiempofacturable " +
 				"FROM hojadetiempo h " +
 				"JOIN cliente c ON c.id = h.cliente_id_oid " +
@@ -157,68 +161,85 @@ public abstract class ReporteBase {
 
 	protected void buildStyles() {
 		arialStyle = stl.style()
-				.setFontName("Arial").setPadding(0).setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)
+				.setFontName("Arial")
 				.setFontSize(8);
+		arialLeftStyle = stl.style(arialStyle)
+				.setHorizontalTextAlignment(HorizontalTextAlignment.LEFT);
+		arialRightStyle = stl.style(arialStyle)
+				.setHorizontalTextAlignment(HorizontalTextAlignment.RIGHT);
+		arialCenterStyle = stl.style(arialStyle)
+				.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER);
 		columnTitleStyle = stl.style(arialStyle)
-				.bold().setFontSize(10)
-				.setPadding(0)
+				.bold()
+				.setBorder(stl.pen1Point().setLineColor(Color.GRAY))
+				.setFontSize(10)
 				.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)
-				.setTopBorder(stl.pen1Point().setLineColor(Color.GRAY))
-				.setBottomBorder(stl.pen1Point().setLineColor(Color.GRAY));
-		arialBoldStyle = stl.style(arialStyle).bold()
+				.setVerticalTextAlignment(VerticalTextAlignment.MIDDLE);
+		arialBoldStyle = stl.style(arialStyle)
+				.bold()
 				.setFontSize(14);
 		piePaginaStyle = stl.style(arialStyle)
 				.bold()
 				.setFontSize(10)
-				.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER);
+				.setHorizontalTextAlignment(HorizontalTextAlignment.LEFT);
 		subtotalStyle = stl.style(arialStyle)
 				.bold()
 				.setFontSize(12)
-				.setTopBorder(stl.pen1Point())
+				.setTopPadding(20)
 				.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER);
 	}
 
 	protected ColumnBuilder columnaAbogado() {
 		return col.column(idioma.getString("abogado"), "username", type.stringType())
-				.setWidth(70)
-				.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)
-				.setStyle(arialStyle)
-				.setTitleStyle(columnTitleStyle.setLeftBorder(stl.pen1Point()));
+				.setStyle(arialLeftStyle)
+				.setTitleStyle(columnTitleStyle) //.setLeftBorder(stl.pen1Point()))
+				.setWidth(48);
+	}
+
+	protected ColumnBuilder columnaCliente() {
+		return col.column(idioma.getString("cliente"), "nombre", type.stringType())
+				.setStyle(arialLeftStyle)
+				.setTitleStyle(columnTitleStyle) //.setLeftBorder(stl.pen1Point()))
+				.setWidth(86);
 	}
 
 	protected ColumnBuilder columnaConsulta() {
 		return col.column(idioma.getString("consulta"), idioma.getString("campo-tipo-servicio"), type.stringType())
-				.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)
-				.setStyle(arialStyle.setRightPadding(10))
-				.setTitleStyle(columnTitleStyle);
+				.setStyle(arialLeftStyle)
+				.setTitleStyle(columnTitleStyle)
+				.setWidth(48);
 	}
 
 	protected ColumnBuilder columnaDetalles() {
 		return col.column(idioma.getString("detalles"), "servicio", type.stringType())
 				.setTitleStyle(columnTitleStyle)
-				.setStyle(arialStyle)
-				.setWidth(170);
+				.setStyle(arialLeftStyle)
+				.setWidth(140);
 	}
 
 	protected ColumnBuilder columnaFecha() {
 		return col.column(idioma.getString("fecha"), "fecha", type.dateType())
-				.setWidth(70)
-				.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)
-				.setStyle(arialStyle)
-				.setTitleStyle(columnTitleStyle);
+				.setStyle(arialCenterStyle)
+				.setTitleStyle(columnTitleStyle)
+				.setWidth(54);
 	}
 
 	protected ColumnBuilder columnaReferencia() {
 		return col.column(idioma.getString("referencia"), "caso", type.stringType())
 				.setTitleStyle(columnTitleStyle)
-				.setStyle(arialStyle)
-				.setWidth(100);
+				.setStyle(arialLeftStyle)
+				.setWidth(95);
 	}
 
 	protected ColumnBuilder columnaSolicitante() {
 		return col.column(idioma.getString("solicitante"), "solicitadopor", type.stringType())
-				.setStyle(arialStyle)
-				.setTitleStyle(columnTitleStyle);
+				.setStyle(arialLeftStyle)
+				.setTitleStyle(columnTitleStyle)
+				.setWidth(95);
+	}
+
+	protected ColumnBuilder columnaVacia() {
+		return col.emptyColumn().setWidth(3);
 	}
 
 	protected String formatearHoras(Long horas, Long minutos) {

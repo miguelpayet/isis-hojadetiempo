@@ -6,7 +6,7 @@ import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
 import net.sf.dynamicreports.report.builder.component.TextFieldBuilder;
 import net.sf.dynamicreports.report.builder.group.ColumnGroupBuilder;
 import net.sf.dynamicreports.report.constant.Calculation;
-import net.sf.dynamicreports.report.constant.HorizontalAlignment;
+import net.sf.dynamicreports.report.constant.GroupHeaderLayout;
 import net.sf.dynamicreports.report.definition.ReportParameters;
 import org.isisaddons.module.security.dom.user.ApplicationUser;
 
@@ -56,7 +56,9 @@ public class ReporteAbogado extends ReporteBase {
 
 		TextColumnBuilder<String> columnaAbogado = col.column("", "username", type.stringType()).setStyle
 				(arialBoldStyle);
-		ColumnGroupBuilder itemGroup = grp.group(columnaAbogado).setHideColumn(true);
+		ColumnGroupBuilder itemGroup = grp.group(columnaAbogado)
+				.setHideColumn(true)
+				.setHeaderLayout(GroupHeaderLayout.EMPTY);
 		TextColumnBuilder<Long> columnaTiempoReal = col.column(idioma.getString("tiempo-real"), "tiemporeal", type
 				.longType()).
 				setValueFormatter(new TiempoRealFormatter());
@@ -71,31 +73,12 @@ public class ReporteAbogado extends ReporteBase {
 		itemGroup.footer(groupSbt);
 
 		rep.columns(
-				col.column(idioma.getString("cliente"), "nombre", type.stringType())
-						.setWidth(60)
-						.setHorizontalAlignment(HorizontalAlignment.CENTER)
-						.setStyle(arialStyle)
-						.setTitleStyle(columnTitleStyle.setLeftBorder(stl.pen1Point())),
-				col.column(idioma.getString("fecha"), "fecha", type.dateType())
-						.setFixedColumns(8)
-						.setHorizontalAlignment(HorizontalAlignment.CENTER)
-						.setStyle(arialStyle)
-						.setTitleStyle(columnTitleStyle),
-				col.column(idioma.getString("consulta"), idioma.getString("campo-tipo-servicio"), type.stringType())
-						.setHorizontalAlignment(HorizontalAlignment.LEFT)
-						.setStyle(arialStyle.setRightPadding(10))
-						.setTitleStyle(columnTitleStyle),
-				col.column(idioma.getString("solicitante"), "solicitadopor", type.stringType())
-						.setStyle(arialStyle)
-						.setTitleStyle(columnTitleStyle),
-				col.column(idioma.getString("referencia"), "caso", type.stringType())
-						.setTitleStyle(columnTitleStyle)
-						.setStyle(arialStyle)
-						.setWidth(100),
-				col.column(idioma.getString("detalles"), "servicio", type.stringType())
-						.setTitleStyle(columnTitleStyle)
-						.setStyle(arialStyle)
-						.setWidth(100),
+				columnaCliente(),
+				columnaFecha(),
+				columnaConsulta(),
+				columnaSolicitante(),
+				columnaReferencia(),
+				columnaDetalles(),
 				columnaTiempoReal.setStyle(arialStyle)
 						.setTitleStyle(columnTitleStyle)
 						.setWidth(70),
@@ -106,7 +89,7 @@ public class ReporteAbogado extends ReporteBase {
 	}
 
 	protected void buildSqlOrder() {
-		sql = sql + " order by a.username, h.fecha, h.caso";
+		sql = sql + " order by a.username, h.fecha, caso";
 	}
 
 	protected void buildSqlWhere() {

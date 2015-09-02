@@ -20,6 +20,7 @@ public class ReporteClienteCaso extends ReporteCliente {
 	}
 
 	protected void buildSqlWhere() {
-		sql = sql + " where c.id = %d and h.fecha >= '%TY-%Tm-%Td' and h.fecha <= '%TY-%Tm-%Td' and ca.caso_id_oid = '%s'";
+		sql = sql + " where c.id = %d and h.fecha >= '%TY-%Tm-%Td' and h.fecha <= '%TY-%Tm-%Td' and h.caso_id_oid = " +
+				"'%s'";
 	}
 }

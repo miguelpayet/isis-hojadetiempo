@@ -45,9 +45,7 @@ public class Idioma {
 
 	public String getString(String name) {
 		String valor = "nulo";
-		//if (strings.isEmpty()) {
 		loadStrings(codigo);
-		//∫}
 		if (strings.containsKey(name)) {
 			valor = strings.get(name).toString();
 		}
@@ -67,7 +65,7 @@ public class Idioma {
 				strings.put("minutos", "Minute(s)");
 				strings.put("paginador", "Page {0} of {1}");
 				strings.put("referencia", "Reference");
-				strings.put("solicitante", "Applicant");
+				strings.put("solicitante", "Requested By");
 				strings.put("tiempo-facturable", "Billable");
 				strings.put("tiempo-real", "Real");
 				break;
@@ -80,7 +78,7 @@ public class Idioma {
 				strings.put("fecha", "Fecha");
 				strings.put("horas", "Hora(s),");
 				strings.put("minutos", "Minuto(s)");
-				strings.put("paginador", "Página {0} de {1}");
+				strings.put("paginador", "Pág. {0} de {1}");
 				strings.put("referencia", "Referencia");
 				strings.put("solicitante", "Solicitante");
 				strings.put("tiempo-facturable", "Facturable");

@@ -55,10 +55,11 @@ public class ReporteCliente extends ReporteBase {
 		super.build();
 
 		TextColumnBuilder<String> columnaCliente = col.column("", "nombre", type.stringType()).setStyle(arialBoldStyle);
-		ColumnGroupBuilder itemGroup = grp.group(columnaCliente).setHideColumn(true);
-		itemGroup.setHeaderLayout(GroupHeaderLayout.EMPTY);
-		TextColumnBuilder<Long> columnaTiempo = col.column("Total", "tiemporeal", type.longType()).setValueFormatter(new
-				TiempoRealFormatter());
+		ColumnGroupBuilder itemGroup = grp.group(columnaCliente)
+				.setHideColumn(true)
+				.setHeaderLayout(GroupHeaderLayout.EMPTY);
+		TextColumnBuilder<Long> columnaTiempo = col.column("Total", "tiemporeal", type.longType()).
+				setValueFormatter(new TiempoRealFormatter());
 		VariableBuilder<Long> sumaTiempo = variable(columnaTiempo, Calculation.SUM);
 		rep.variables(sumaTiempo);
 		TextFieldBuilder<String> groupSbt = cmp.text(new SubtotalCliente(sumaTiempo)).setStyle(subtotalStyle);
@@ -67,27 +68,24 @@ public class ReporteCliente extends ReporteBase {
 
 		rep.columns(
 				columnaAbogado(),
+				columnaVacia(),
 				columnaFecha(),
+				columnaVacia(),
 				columnaConsulta(),
+				columnaVacia(),
 				columnaSolicitante(),
+				columnaVacia(),
 				columnaReferencia(),
+				columnaVacia(),
 				columnaDetalles(),
-				columnaTiempo.setStyle(arialStyle).setWidth(130)
+				columnaVacia(),
+				columnaTiempo.setStyle(arialRightStyle).setWidth(99).setTitleStyle(columnTitleStyle)
 		);
 	}
 
 	protected void buildSqlOrder() {
 		sql = sql + " order by a.username, h.fecha, caso";
 	}
-
-/*	protected void buildSqlSelect() {
-		sql = "select h.fecha, c.nombre, a.username, f.nombre tipo_servicio, f.nombreingles tipo_servicio_en, " +
-				"h.solicitadopor,  h.caso, h.servicio, (horasfacturables * 3600 + minutosfacturables * 60) tiemporeal " +
-				"from hojadetiempo h " +
-				"join cliente c on c.id = h.cliente_id_oid " +
-				"join applicationuser a on a.id=h.abogado_id_oid " +
-				"join formaservicio f on f.id = h.formaservicio_id_oid ";
-	}*/
 
 	protected void buildSqlWhere() {
 		sql = sql + " where c.id = %d and h.fecha >= '%TY-%Tm-%Td' and h.fecha <= '%TY-%Tm-%Td' ";
